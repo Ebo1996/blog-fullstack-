@@ -1861,3 +1861,63 @@ img {
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   HOVER UTILITY CLASSES
+   Replaces inline onMouseOver/onMouseOut JS handlers so these
+   components can remain Server Components.
+───────────────────────────────────────────────────────────── */
+
+/* Lift + border highlight (cards, event tiles) */
+.hover-lift {
+  transition: transform var(--transition-base), border-color var(--transition-base);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong) !important;
+}
+
+/* Lift 2px variant (smaller cards) */
+.hover-lift-sm {
+  transition: transform var(--transition-base), border-color var(--transition-base);
+}
+.hover-lift-sm:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong) !important;
+}
+
+/* Border highlight only (no lift) */
+.hover-border {
+  transition: border-color var(--transition-base);
+}
+.hover-border:hover {
+  border-color: var(--border-strong) !important;
+}
+
+/* Text color on hover */
+.hover-fg {
+  transition: color var(--transition-fast);
+}
+.hover-fg:hover {
+  color: var(--foreground) !important;
+}
+
+/* Background on hover */
+.hover-bg {
+  transition: background var(--transition-fast);
+}
+.hover-bg:hover {
+  background: var(--muted) !important;
+}
+
+/* Event card link */
+.event-card-link:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong) !important;
+}
+
+/* Organizer event tile */
+.hover-tile:hover {
+  border-color: rgba(124,106,245,0.4) !important;
+  transform: translateY(-2px);
+}

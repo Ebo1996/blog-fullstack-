@@ -1,4 +1,5 @@
 import Link from 'next/link'
+// Note: hover effects handled via CSS className, not inline JS handlers
 import Image from 'next/image'
 import { CalendarDays, MapPin, ArrowUpRight } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils/format'
@@ -101,16 +102,7 @@ export function EventCard({ event, minPrice }: { event: EventWithCategory; minPr
         transition: 'transform var(--transition-base), border-color var(--transition-base)',
         textDecoration: 'none',
       }}
-      onMouseOver={(e) => {
-        const el = e.currentTarget as HTMLAnchorElement
-        el.style.transform = 'translateY(-3px)'
-        el.style.borderColor = 'var(--border-strong)'
-      }}
-      onMouseOut={(e) => {
-        const el = e.currentTarget as HTMLAnchorElement
-        el.style.transform = ''
-        el.style.borderColor = 'var(--border)'
-      }}
+      className="event-card-link"
     >
       {/* Image / artwork */}
       <div style={{ height: 160, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>

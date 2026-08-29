@@ -4,11 +4,12 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import {
   CalendarDays, MapPin, Clock, Users, ArrowLeft,
-  Share2, ExternalLink, ChevronRight,
+  ExternalLink, ChevronRight,
 } from 'lucide-react'
 import { getEventBySlug, getFeaturedEvents } from '@/services/events'
 import { TicketPurchasePanel } from '@/components/public/ticket-purchase-panel'
 import { EventCardRow } from '@/components/public/event-card'
+import { CopyLinkButton } from '@/components/public/copy-link-button'
 import { Avatar } from '@/components/ui/avatar'
 import { EventStatusBadge } from '@/components/ui/badge'
 import { formatDate, formatDateRange, formatNumber } from '@/lib/utils/format'
@@ -256,10 +257,24 @@ export default async function EventPage({ params }: EventPageProps) {
             <span style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>Share this event:</span>
             <CopyLinkButton title={event.title} />
           </div>
+
+          {/* Related events — below all left-column content, outside the sticky right panel */}
+          {relatedEvents.length > 0 && (
+            <div className="panel" style={{ marginTop: 40 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: 'var(--muted-foreground)', textTransform: 'uppercase', marginBottom: 12 }}>
+                You might also like
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {relatedEvents.map((e) => (
+                  <EventCardRow key={e.id} event={e} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ── Right column: ticket panel ──────────────────────────────── */}
-        <div>
+        {/* ── Right column: ticket panel only, fully sticky ────────────── */}
+        <div style={{ position: 'sticky', top: 84 }}>
           {isPast ? (
             <div className="panel" style={{ textAlign: 'center', padding: '32px 24px' }}>
               <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 400, margin: '0 0 8px' }}>
@@ -282,39 +297,10 @@ export default async function EventPage({ params }: EventPageProps) {
               isAuthenticated={isAuthenticated}
             />
           )}
-
-          {/* Sticky related events below */}
-          {relatedEvents.length > 0 && (
-            <div className="panel" style={{ marginTop: 16 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: 'var(--muted-foreground)', textTransform: 'uppercase', marginBottom: 8 }}>
-                You might also like
-              </p>
-              {relatedEvents.map((e) => (
-                <EventCardRow key={e.id} event={e} />
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </main>
   )
 }
 
-// ─── Inline copy-link button ────────────────────────────────────────────────
-function CopyLinkButton({ title }: { title: string }) {
-  return (
-    <button
-      className="button button-outline button-sm"
-      style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-      onClick={() => {
-        if (typeof window !== 'undefined') {
-          void navigator.clipboard.writeText(window.location.href)
-        }
-      }}
-      aria-label={`Copy link to ${title}`}
-    >
-      <Share2 size={12} aria-hidden="true" />
-      Copy link
-    </button>
-  )
-}
+// ─── Inline copy-link button extracted to components/public/copy-link-button.tsx

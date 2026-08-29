@@ -2,11 +2,14 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
-import { getCategoryBySlug, getAllCategories } from '@/services/categories'
+import { getCategoryBySlug, getAllCategories, getAllCategoriesBuildTime } from '@/services/categories'
 import { getEventsByCategory } from '@/services/events'
 import { EventCard } from '@/components/public/event-card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { CalendarDays } from 'lucide-react'
+
+// Force dynamic rendering to ensure cookies() is called in request context
+export const dynamic = 'force-dynamic'
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>
@@ -23,10 +26,15 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 }
 
-export async function generateStaticParams() {
-  const categories = await getAllCategories()
-  return categories.map((c) => ({ category: c.slug }))
-}
+// Removed generateStaticParams to avoid cookies() call at build time
+// Categories will be generated on-demand instead
+
+// If you want to pre-generate category pages at build time, uncomment this
+// and make sure SUPABASE_SERVICE_ROLE_KEY is set in your environment:
+// export async function generateStaticParams() {
+//   const categories = await getAllCategoriesBuildTime()
+//   return categories.map((c) => ({ category: c.slug }))
+// }
 
 function getString(v: string | string[] | undefined): string {
   return Array.isArray(v) ? (v[0] ?? '') : (v ?? '')

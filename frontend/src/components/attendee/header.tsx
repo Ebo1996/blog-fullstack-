@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Bell, Search, Menu, X } from 'lucide-react'
+import { Search, Menu, X } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
-import type { Profile } from '@/types/database'
+import { NotificationBell } from '@/components/ui/notification-bell'
+import type { Profile, Notification } from '@/types/database'
 
 const mobileLinks = [
   { href: '/dashboard',           label: 'Overview' },
@@ -20,6 +21,9 @@ interface DashboardHeaderProps {
   eyebrow?: string
   profile: Profile | null
   unreadCount?: number
+  userId?: string
+  initialNotifications?: Notification[]
+  markAsReadAction?: (id: string, userId: string) => Promise<{ success: boolean }>
 }
 
 export function DashboardHeader({
@@ -27,6 +31,9 @@ export function DashboardHeader({
   eyebrow,
   profile,
   unreadCount = 0,
+  userId,
+  initialNotifications = [],
+  markAsReadAction,
 }: DashboardHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -69,18 +76,45 @@ export function DashboardHeader({
           />
         </label>
 
-        <Link
-          href="/dashboard/notifications"
-          className="icon-button"
-          aria-label={
-            unreadCount > 0
-              ? `${unreadCount} unread notifications`
-              : 'Notifications'
-          }
-        >
-          <Bell aria-hidden="true" />
-          {unreadCount > 0 && <i aria-hidden="true" />}
-        </Link>
+        {userId && markAsReadAction ? (
+          <NotificationBell
+            userId={userId}
+            initialUnreadCount={unreadCount}
+            initialNotifications={initialNotifications}
+            markAsReadAction={markAsReadAction}
+          />
+        ) : (
+          <Link
+            href="/dashboard/notifications"
+            className="icon-button"
+            aria-label={
+              unreadCount > 0
+                ? `${unreadCount} unread notifications`
+                : 'Notifications'
+            }
+          >
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -4,
+                  background: 'var(--error)',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  width: 18,
+                  height: 18,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  display: 'grid',
+                  placeItems: 'center',
+                }}
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </Link>
+        )}
 
         <Link href="/dashboard/settings" aria-label="Account settings">
           <Avatar
@@ -113,3 +147,6 @@ export function DashboardHeader({
     </header>
   )
 }
+
+// Alias for consistency with other files
+export { DashboardHeader as AttendeeHeader }

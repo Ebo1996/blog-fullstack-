@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 
 const footerLinks = {
@@ -61,13 +63,11 @@ export function SiteFooter() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
+                    className="hover-fg"
                     style={{
                       fontSize: 13,
                       color: 'var(--muted-foreground)',
-                      transition: 'color var(--transition-fast)',
                     }}
-                    onMouseOver={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--foreground)' }}
-                    onMouseOut={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted-foreground)' }}
                   >
                     {item.label}
                   </Link>

@@ -1,193 +1,206 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Users, X, ArrowRight, AlertCircle } from 'lucide-react'
+import { Send, X, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
+import { createTransferAction } from '@/app/dashboard/transfers/actions'
 
-interface TransferDialogProps {
+interface TransferButtonProps {
   ticketId: string
   eventTitle: string
-  onSuccess?: () => void
 }
 
-export function TransferButton({ ticketId, eventTitle }: TransferDialogProps) {
-  const [open, setOpen] = useState(false)
+export function TransferButton({ ticketId, eventTitle }: TransferButtonProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [isPending, startTransition] = useTransition()
+  const [pending, startTransition] = useTransition()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address.')
+    if (!email.trim()) {
+      setError('Please enter a valid email')
       return
     }
+
     setError(null)
+    setSuccess(false)
+
     startTransition(async () => {
-      try {
-        const res = await fetch('/api/tickets/transfer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticketId, toEmail: email.trim() }),
-        })
-        const data = await res.json() as { success?: boolean; error?: string }
-        if (!res.ok || !data.success) {
-          setError(data.error ?? 'Transfer failed. Please try again.')
-          return
-        }
-        setSuccess(true)
-      } catch {
-        setError('Network error. Please try again.')
+      const result = await createTransferAction(ticketId, email.trim())
+      if (result.error) {
+        setError(result.error)
+        return
       }
+      setSuccess(true)
+      setTimeout(() => {
+        setIsOpen(false)
+        setEmail('')
+        setSuccess(false)
+      }, 2000)
     })
+  }
+
+  function handleClose() {
+    if (pending) return
+    setIsOpen(false)
+    setEmail('')
+    setError(null)
+    setSuccess(false)
   }
 
   return (
     <>
+      {/* Button */}
       <button
+        onClick={() => setIsOpen(true)}
         className="button button-outline"
-        onClick={() => { setOpen(true); setSuccess(false); setError(null); setEmail('') }}
+        style={{ gap: 7 }}
       >
-        <Users size={14} aria-hidden="true" />
+        <Send size={14} aria-hidden="true" />
         Transfer ticket
       </button>
 
-      {open && (
-        /* Native <dialog> for accessibility */
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="transfer-dialog-title"
-          style={{
-            position: 'fixed', inset: 0, zIndex: 'var(--z-modal)' as never,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 24,
-          }}
-        >
+      {/* Dialog */}
+      {isOpen && (
+        <>
           {/* Backdrop */}
           <div
-            aria-hidden="true"
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
             style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)',
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              zIndex: 50,
+              animation: 'fadeIn 0.2s',
             }}
+            aria-hidden="true"
           />
 
-          {/* Panel */}
+          {/* Dialog */}
           <div
+            role="dialog"
+            aria-labelledby="transfer-title"
+            aria-modal="true"
             style={{
-              position: 'relative', zIndex: 1,
-              background: 'var(--card)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-xl)', padding: 32,
-              width: '100%', maxWidth: 420,
-              boxShadow: 'var(--shadow-lg)',
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 51,
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              width: '90%',
+              maxWidth: 480,
+              padding: 24,
+              animation: 'slideUp 0.2s',
+              boxShadow: 'var(--shadow-xl)',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
               <div>
                 <h2
-                  id="transfer-dialog-title"
-                  style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 400, margin: '0 0 4px', letterSpacing: '-0.02em' }}
+                  id="transfer-title"
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 20,
+                    fontWeight: 400,
+                    margin: '0 0 4px',
+                    letterSpacing: '-0.01em',
+                  }}
                 >
                   Transfer ticket
                 </h2>
-                <p style={{ fontSize: 12, color: 'var(--muted-foreground)', margin: 0 }}>
+                <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: 0 }}>
                   {eventTitle}
                 </p>
               </div>
               <button
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-                style={{ background: 'none', border: 0, color: 'var(--muted-foreground)', cursor: 'pointer', padding: 4 }}
+                onClick={handleClose}
+                disabled={pending}
+                aria-label="Close dialog"
+                style={{
+                  background: 'none',
+                  border: 0,
+                  color: 'var(--muted-foreground)',
+                  cursor: pending ? 'not-allowed' : 'pointer',
+                  padding: 4,
+                  opacity: pending ? 0.5 : 1,
+                }}
               >
-                <X size={18} aria-hidden="true" />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
-            {success ? (
-              <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                <div
-                  style={{
-                    display: 'grid', placeItems: 'center',
-                    width: 52, height: 52, borderRadius: 'var(--radius-lg)',
-                    background: 'var(--success-bg)', color: 'var(--success)',
-                    margin: '0 auto 16px',
-                  }}
-                  aria-hidden="true"
-                >
-                  <Users size={24} />
-                </div>
-                <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 6px' }}>Transfer sent</p>
-                <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: '0 0 20px', lineHeight: 1.6 }}>
-                  We&apos;ve sent a transfer request to <strong>{email}</strong>. They have 72 hours to accept.
-                </p>
-                <button
-                  className="button button-outline"
-                  style={{ width: '100%' }}
-                  onClick={() => setOpen(false)}
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <>
-                <Alert variant="info" style={{ marginBottom: 20 }}>
-                  The recipient has 72 hours to accept. Your ticket stays valid until they do.
+            {/* Form */}
+            <form onSubmit={handleSubmit} noValidate>
+              {error && (
+                <Alert variant="error" style={{ marginBottom: 16 }}>
+                  <AlertCircle size={13} aria-hidden="true" style={{ flexShrink: 0 }} />
+                  {error}
                 </Alert>
+              )}
 
-                {error && (
-                  <Alert variant="error" style={{ marginBottom: 16 }}>
-                    <AlertCircle size={13} style={{ marginRight: 6, flexShrink: 0 }} aria-hidden="true" />
-                    {error}
-                  </Alert>
-                )}
+              {success && (
+                <Alert variant="success" style={{ marginBottom: 16 }}>
+                  Transfer sent! Redirecting…
+                </Alert>
+              )}
 
-                <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div className="form-group">
-                    <label className="form-label required" htmlFor="transfer-email">
-                      Recipient&apos;s email address
-                    </label>
-                    <input
-                      id="transfer-email"
-                      type="email"
-                      className="form-input"
-                      placeholder="friend@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                      required
-                    />
-                    <p className="form-hint">They must have a Northstar account.</p>
-                  </div>
+              <div className="form-group">
+                <label htmlFor="transfer-email" className="form-label required">
+                  Recipient email
+                </label>
+                <input
+                  id="transfer-email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="friend@example.com"
+                  className="form-input"
+                  disabled={pending || success}
+                  autoFocus
+                />
+                <span className="form-help">
+                  They must have an account on this platform.
+                </span>
+              </div>
 
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button
-                      type="button"
-                      className="button button-outline"
-                      style={{ flex: 1 }}
-                      onClick={() => setOpen(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="button button-primary"
-                      style={{ flex: 1, gap: 8 }}
-                      disabled={isPending}
-                      aria-busy={isPending}
-                    >
-                      {isPending ? 'Sending…' : (
-                        <><ArrowRight size={14} aria-hidden="true" /> Send transfer</>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
+              <div className="form-notice" style={{ marginTop: 16, marginBottom: 16 }}>
+                <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: 0 }}>
+                  The recipient will receive a notification and have 7 days to accept.
+                  You can cancel the transfer before they accept.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={pending || success}
+                  className="button button-muted"
+                >
+                  Cancel
+                </button>
+                <Button
+                  type="submit"
+                  loading={pending}
+                  disabled={success}
+                  style={{ gap: 7 }}
+                >
+                  <Send size={14} aria-hidden="true" />
+                  {pending ? 'Sending…' : 'Send transfer'}
+                </Button>
+              </div>
+            </form>
           </div>
-        </div>
+        </>
       )}
     </>
   )

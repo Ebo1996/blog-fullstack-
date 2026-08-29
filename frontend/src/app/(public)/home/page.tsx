@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowUpRight, Calendar, Shield, Ticket, Zap, Users, BarChart2 } from 'lucide-react'
+import { ArrowUpRight, Calendar, Shield, Ticket, Zap, Users, BarChart2, Sparkles, ChevronRight } from 'lucide-react'
 import { getFeaturedEvents, getUpcomingEvents } from '@/services/events'
 import { getAllCategories } from '@/services/categories'
 import { EventCard, EventCardFeatured } from '@/components/public/event-card'
@@ -11,51 +11,71 @@ export const metadata: Metadata = {
   description: 'Find conferences, concerts, workshops, meetups, festivals and more.',
 }
 
-// Category color mapping
-const categoryColors: Record<string, string> = {
-  technology:    '#1a2638',
-  music:         '#2a1a38',
-  business:      '#1a2a2a',
-  design:        '#38281a',
-  sports:        '#1a3820',
-  education:     '#1a2838',
-  networking:    '#2a1a2a',
-  entertainment: '#381a1a',
-  art:           '#281a38',
-  culture:       '#1a2828',
+export const dynamic = 'force-dynamic'
+
+const categoryColors: Record<string, { bg: string; border: string; dot: string }> = {
+  technology:    { bg: 'linear-gradient(135deg, #0f1a2e 0%, #1a2638 100%)', border: '#1e3a5f', dot: '#6baee0' },
+  music:         { bg: 'linear-gradient(135deg, #1a0f2e 0%, #2a1a38 100%)', border: '#3d1f6e', dot: '#a78bfa' },
+  business:      { bg: 'linear-gradient(135deg, #0f1f1f 0%, #1a2a2a 100%)', border: '#1e4040', dot: '#34d399' },
+  design:        { bg: 'linear-gradient(135deg, #2a1a0f 0%, #38281a 100%)', border: '#5a3a18', dot: '#fbbf24' },
+  sports:        { bg: 'linear-gradient(135deg, #0f2018 0%, #1a3820 100%)', border: '#1a4a28', dot: '#6ee7b7' },
+  education:     { bg: 'linear-gradient(135deg, #0f1a2a 0%, #1a2838 100%)', border: '#1a3a5a', dot: '#93c5fd' },
+  networking:    { bg: 'linear-gradient(135deg, #1a0f2a 0%, #2a1a2a 100%)', border: '#3a1a4a', dot: '#f0abfc' },
+  entertainment: { bg: 'linear-gradient(135deg, #2a0f0f 0%, #381a1a 100%)', border: '#5a1a1a', dot: '#fca5a5' },
+  art:           { bg: 'linear-gradient(135deg, #1e0f2a 0%, #281a38 100%)', border: '#4a1a5a', dot: '#d8b4fe' },
+  culture:       { bg: 'linear-gradient(135deg, #0f1e1e 0%, #1a2828 100%)', border: '#1a4040', dot: '#5eead4' },
 }
 
 const whyItems = [
   {
-    icon: <Ticket size={20} aria-hidden="true" />,
+    icon: <Ticket size={18} aria-hidden="true" />,
     title: 'Instant digital tickets',
     body: 'QR-coded tickets delivered immediately. No printing, no waiting — just show up.',
+    accent: 'var(--primary)',
+    accentBg: 'rgba(215,243,106,0.08)',
   },
   {
-    icon: <Shield size={20} aria-hidden="true" />,
+    icon: <Shield size={18} aria-hidden="true" />,
     title: 'Secure payments',
     body: 'Stripe-powered checkout with fraud protection. Your payment data never touches our servers.',
+    accent: '#34d399',
+    accentBg: 'rgba(52,211,153,0.08)',
   },
   {
-    icon: <Calendar size={20} aria-hidden="true" />,
+    icon: <Calendar size={18} aria-hidden="true" />,
     title: 'Never miss an event',
     body: 'Smart reminders 7 days, 1 day, and 1 hour before your event. Add to wallet in one tap.',
+    accent: '#93c5fd',
+    accentBg: 'rgba(147,197,253,0.08)',
   },
   {
-    icon: <Users size={20} aria-hidden="true" />,
+    icon: <Users size={18} aria-hidden="true" />,
     title: 'Easy ticket transfers',
     body: "Can't make it? Transfer your ticket to a friend in seconds. No group-chat chaos.",
+    accent: '#f0abfc',
+    accentBg: 'rgba(240,171,252,0.08)',
   },
   {
-    icon: <Zap size={20} aria-hidden="true" />,
+    icon: <Zap size={18} aria-hidden="true" />,
     title: 'Fast check-in',
     body: 'QR scanning handles thousands of attendees. Staff check in guests in under 2 seconds.',
+    accent: '#fbbf24',
+    accentBg: 'rgba(251,191,36,0.08)',
   },
   {
-    icon: <BarChart2 size={20} aria-hidden="true" />,
+    icon: <BarChart2 size={18} aria-hidden="true" />,
     title: 'Organizer analytics',
     body: 'Real-time revenue, sales trends, and check-in rates. Everything you need to run a great event.',
+    accent: '#fca5a5',
+    accentBg: 'rgba(252,165,165,0.08)',
   },
+]
+
+const stats = [
+  { value: '50K+', label: 'Tickets sold' },
+  { value: '1,200+', label: 'Events hosted' },
+  { value: '98%', label: 'Satisfaction rate' },
+  { value: '2 min', label: 'Avg. setup time' },
 ]
 
 export default async function HomePage() {
@@ -74,127 +94,234 @@ export default async function HomePage() {
       <section
         aria-label="Hero"
         style={{
-          minHeight: '82vh',
+          minHeight: '88vh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          padding: 'clamp(60px, 10vh, 120px) 24px 80px',
+          padding: 'clamp(80px, 12vh, 140px) 24px 100px',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Background gradient */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute', inset: 0, zIndex: 0,
-            background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(215,243,106,0.07) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
+        {/* Layered background effects */}
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+          {/* Primary radial glow */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(ellipse 90% 70% at 50% -5%, rgba(215,243,106,0.09) 0%, transparent 65%)',
+          }} />
+          {/* Secondary accent glows */}
+          <div style={{
+            position: 'absolute',
+            width: 600, height: 600,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(107,174,224,0.05) 0%, transparent 70%)',
+            top: '10%', left: '-10%',
+          }} />
+          <div style={{
+            position: 'absolute',
+            width: 500, height: 500,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)',
+            top: '5%', right: '-5%',
+          }} />
+          {/* Subtle grid texture */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
+            backgroundSize: '80px 80px',
+            maskImage: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 80%)',
+          }} />
+        </div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 760 }}>
-          <p
-            style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: '0.22em',
-              color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 24,
-            }}
-          >
-            Event management & ticketing
-          </p>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 820 }}>
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'rgba(215,243,106,0.07)',
+            border: '1px solid rgba(215,243,106,0.18)',
+            borderRadius: 99, padding: '6px 16px',
+            marginBottom: 32,
+          }}>
+            <Sparkles size={12} style={{ color: 'var(--primary)' }} aria-hidden="true" />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', color: 'var(--primary)', textTransform: 'uppercase' }}>
+              Event management &amp; ticketing
+            </span>
+          </div>
+
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: 'clamp(42px, 7vw, 80px)',
+              fontSize: 'clamp(48px, 8vw, 92px)',
               fontWeight: 400,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.0,
-              margin: '0 0 24px',
+              letterSpacing: '-0.04em',
+              lineHeight: 0.95,
+              margin: '0 0 28px',
+              background: 'linear-gradient(180deg, #f4f1e8 30%, rgba(244,241,232,0.55) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
             }}
           >
-            Discover events<br />worth attending.
+            Discover events<br />
+            <span style={{
+              background: 'linear-gradient(135deg, #d7f36a 0%, #b8e832 50%, #d7f36a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              worth attending.
+            </span>
           </h1>
+
           <p
             style={{
               color: 'var(--muted-foreground)',
-              fontSize: 'clamp(15px, 2vw, 18px)',
+              fontSize: 'clamp(15px, 2vw, 19px)',
               lineHeight: 1.65,
-              maxWidth: 520,
-              margin: '0 auto 40px',
+              maxWidth: 560,
+              margin: '0 auto 48px',
+              letterSpacing: '-0.01em',
             }}
           >
             Find conferences, concerts, workshops, meetups, festivals and more — all in one place.
           </p>
 
-          {/* Search bar */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+          {/* Search */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 40 }}>
             <HomeSearch />
           </div>
 
           {/* CTAs */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/events" className="button button-primary button-lg">
+            <Link
+              href="/events"
+              className="button button-primary button-lg"
+              style={{ paddingLeft: 28, paddingRight: 28, boxShadow: '0 0 32px rgba(215,243,106,0.18)' }}
+            >
               Explore events
             </Link>
-            <Link href="/organizer" className="button button-outline button-lg">
+            <Link
+              href="/register"
+              className="button button-outline button-lg"
+              style={{ paddingLeft: 28, paddingRight: 28 }}
+            >
               Create an event
             </Link>
           </div>
+
+          {/* Trust line */}
+          <p style={{ marginTop: 32, fontSize: 12, color: 'var(--muted-foreground)', opacity: 0.7 }}>
+            Trusted by 1,200+ organizers · No credit card required
+          </p>
         </div>
       </section>
+
+      {/* ── STATS BAR ─────────────────────────────────────────────────────── */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
+        background: 'linear-gradient(90deg, rgba(215,243,106,0.02) 0%, transparent 50%, rgba(215,243,106,0.02) 100%)',
+      }}>
+        <div style={{
+          maxWidth: 1200, margin: '0 auto',
+          padding: '0 24px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+        }}>
+          {stats.map((stat, i) => (
+            <div
+              key={stat.label}
+              style={{
+                padding: '28px 24px',
+                textAlign: 'center',
+                borderRight: i < 3 ? '1px solid var(--border)' : 'none',
+              }}
+            >
+              <div style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 'clamp(28px, 3vw, 40px)',
+                fontWeight: 400,
+                letterSpacing: '-0.04em',
+                color: 'var(--primary)',
+                lineHeight: 1,
+                marginBottom: 6,
+              }}>
+                {stat.value}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--muted-foreground)', letterSpacing: '0.04em' }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ── FEATURED EVENTS ───────────────────────────────────────────────── */}
       {featured.length > 0 && (
         <section
           aria-labelledby="featured-heading"
-          style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 80px' }}
+          style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px' }}
         >
-          <div className="section-heading" style={{ marginTop: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
             <div>
-              <p className="eyebrow">FEATURED</p>
-              <h2>Events happening soon</h2>
+              <p className="eyebrow" style={{ marginBottom: 10 }}>FEATURED</p>
+              <h2
+                id="featured-heading"
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 'clamp(26px, 3vw, 38px)',
+                  fontWeight: 400,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
+                }}
+              >
+                Events happening soon
+              </h2>
             </div>
-            <Link href="/events" className="text-link">
+            <Link href="/events" className="text-link" style={{ gap: 6 }}>
               View all <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
           </div>
 
-          {/* Hero event + side cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 16, marginTop: 24 }}>
-            {heroEvent && (
-              <EventCardFeatured event={heroEvent} />
-            )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {featuredRest.map((event) => (
+          <div style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 16 }}>
+            {heroEvent && <EventCardFeatured event={heroEvent} />}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {featuredRest.map((event, idx) => (
                 <Link
                   key={event.id}
                   href={`/events/${event.slug}`}
                   style={{
                     display: 'flex', gap: 14, alignItems: 'center',
-                    background: 'var(--card)', border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)', padding: '14px 16px',
-                    transition: 'border-color var(--transition-base)',
+                    background: 'var(--card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '14px 16px',
                     flex: 1,
+                    transition: 'border-color 0.15s ease, background 0.15s ease',
                   }}
-                  onMouseOver={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--border-strong)' }}
-                  onMouseOut={(e) => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--border)' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLAnchorElement).style.background = 'var(--card-hover)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLAnchorElement).style.background = 'var(--card)' }}
                 >
-                  <div className={`event-art event-art-small ${['event-violet','event-amber','event-teal'][featuredRest.indexOf(event) % 3]}`} aria-hidden="true">
+                  <div
+                    className={`event-art event-art-small ${['event-violet', 'event-amber', 'event-teal'][idx % 3]}`}
+                    aria-hidden="true"
+                  >
                     <span style={{ fontSize: 11 }}>
                       {event.title.split(' ').map((w) => w[0]).join('').slice(0, 3)}
                     </span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {event.title}
                     </p>
                     <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: 0 }}>
                       {new Date(event.start_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {event.city}
                     </p>
                   </div>
-                  <ArrowUpRight size={15} style={{ color: 'var(--muted-foreground)', flexShrink: 0 }} aria-hidden="true" />
+                  <ChevronRight size={14} style={{ color: 'var(--muted-foreground)', flexShrink: 0 }} aria-hidden="true" />
                 </Link>
               ))}
             </div>
@@ -206,28 +333,41 @@ export default async function HomePage() {
       {upcoming.length > 0 && (
         <section
           aria-labelledby="upcoming-heading"
-          style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 80px' }}
+          style={{
+            background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.015) 50%, transparent 100%)',
+            padding: '80px 24px',
+          }}
         >
-          <div className="section-heading" style={{ marginTop: 0 }}>
-            <div>
-              <p className="eyebrow">UPCOMING</p>
-              <h2 id="upcoming-heading">Happening near you</h2>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+              <div>
+                <p className="eyebrow" style={{ marginBottom: 10 }}>UPCOMING</p>
+                <h2
+                  id="upcoming-heading"
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 'clamp(26px, 3vw, 38px)',
+                    fontWeight: 400,
+                    letterSpacing: '-0.03em',
+                    margin: 0,
+                  }}
+                >
+                  Happening near you
+                </h2>
+              </div>
+              <Link href="/events" className="text-link" style={{ gap: 6 }}>
+                See more <ArrowUpRight size={13} aria-hidden="true" />
+              </Link>
             </div>
-            <Link href="/events" className="text-link">
-              See more <ArrowUpRight size={13} aria-hidden="true" />
-            </Link>
-          </div>
-          <div
-            style={{
+            <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: 16,
-              marginTop: 24,
-            }}
-          >
-            {upcoming.slice(0, 8).map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+            }}>
+              {upcoming.slice(0, 8).map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -236,105 +376,161 @@ export default async function HomePage() {
       {categories.length > 0 && (
         <section
           aria-labelledby="categories-heading"
-          style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 80px' }}
+          style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px' }}
         >
-          <div className="section-heading" style={{ marginTop: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
             <div>
-              <p className="eyebrow">BROWSE</p>
-              <h2 id="categories-heading">Popular categories</h2>
-            </div>
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-              gap: 12,
-              marginTop: 24,
-            }}
-          >
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/categories/${cat.slug}`}
-                aria-label={`Browse ${cat.name} events`}
+              <p className="eyebrow" style={{ marginBottom: 10 }}>BROWSE</p>
+              <h2
+                id="categories-heading"
                 style={{
-                  display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                  minHeight: 120, padding: '16px 18px',
-                  background: categoryColors[cat.slug] ?? 'var(--card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-lg)',
-                  transition: 'transform var(--transition-base), border-color var(--transition-base)',
-                }}
-                onMouseOver={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement
-                  el.style.transform = 'translateY(-2px)'
-                  el.style.borderColor = 'var(--border-strong)'
-                }}
-                onMouseOut={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement
-                  el.style.transform = ''
-                  el.style.borderColor = 'var(--border)'
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 'clamp(26px, 3vw, 38px)',
+                  fontWeight: 400,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
                 }}
               >
-                <p style={{ fontSize: 14, fontWeight: 700, margin: 0, letterSpacing: '-0.01em' }}>
-                  {cat.name}
-                </p>
-                {cat.description && (
-                  <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: '4px 0 0', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {cat.description}
-                  </p>
-                )}
-              </Link>
-            ))}
+                Browse by category
+              </h2>
+            </div>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 12,
+          }}>
+            {categories.map((cat) => {
+              const colors = categoryColors[cat.slug]
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/categories/${cat.slug}`}
+                  aria-label={`Browse ${cat.name} events`}
+                  style={{
+                    display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                    minHeight: 140,
+                    padding: '20px',
+                    background: colors?.bg ?? 'var(--card)',
+                    border: `1px solid ${colors?.border ?? 'var(--border)'}`,
+                    borderRadius: 'var(--radius-xl)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-3px)'
+                    ;(e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 12px 32px rgba(0,0,0,0.4)'
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'
+                    ;(e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none'
+                  }}
+                >
+                  {/* Decorative dot */}
+                  <div aria-hidden="true" style={{
+                    position: 'absolute', top: 20, right: 20,
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: colors?.dot ?? 'var(--primary)',
+                    boxShadow: `0 0 12px ${colors?.dot ?? 'var(--primary)'}`,
+                  }} />
+                  {/* Decorative circle */}
+                  <div aria-hidden="true" style={{
+                    position: 'absolute', top: -30, right: -30,
+                    width: 120, height: 120, borderRadius: '50%',
+                    border: `1px solid ${colors?.border ?? 'var(--border)'}`,
+                    opacity: 0.4,
+                  }} />
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 700, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+                      {cat.name}
+                    </p>
+                    {cat.description && (
+                      <p style={{
+                        fontSize: 11, color: 'var(--muted-foreground)', margin: 0, lineHeight: 1.45,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                      }}>
+                        {cat.description}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </section>
       )}
 
-      {/* ── WHY USE NORTHSTAR ─────────────────────────────────────────────── */}
+      {/* ── WHY NORTHSTAR ─────────────────────────────────────────────────── */}
       <section
         aria-labelledby="why-heading"
         style={{
+          position: 'relative',
+          overflow: 'hidden',
+          padding: '100px 24px',
+          background: 'linear-gradient(180deg, var(--background) 0%, rgba(215,243,106,0.02) 50%, var(--background) 100%)',
           borderTop: '1px solid var(--border)',
           borderBottom: '1px solid var(--border)',
-          padding: '80px 24px',
-          margin: '0 0 0',
         }}
       >
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <p className="eyebrow" style={{ marginBottom: 12 }}>WHY NORTHSTAR</p>
+        {/* Decorative background glow */}
+        <div aria-hidden="true" style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 800, height: 800,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(215,243,106,0.03) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
+          <div style={{ textAlign: 'center', marginBottom: 72 }}>
+            <p className="eyebrow" style={{ marginBottom: 14 }}>WHY NORTHSTAR</p>
             <h2
               id="why-heading"
               style={{
-                fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px, 4vw, 42px)',
-                fontWeight: 400, letterSpacing: '-0.02em', margin: 0,
+                fontFamily: 'var(--font-serif)',
+                fontSize: 'clamp(30px, 4.5vw, 48px)',
+                fontWeight: 400,
+                letterSpacing: '-0.03em',
+                margin: '0 auto',
+                maxWidth: 600,
+                lineHeight: 1.1,
               }}
             >
               Built for people who take events seriously.
             </h2>
           </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 24,
-            }}
-          >
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 2,
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-2xl)',
+            overflow: 'hidden',
+            background: 'var(--border)',
+          }}>
             {whyItems.map((item) => (
-              <div key={item.title} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <span
-                  style={{
-                    display: 'grid', placeItems: 'center',
-                    width: 40, height: 40,
-                    borderRadius: 'var(--radius-md)',
-                    background: 'rgba(215,243,106,0.1)',
-                    color: 'var(--primary)',
-                  }}
-                  aria-hidden="true"
-                >
+              <div
+                key={item.title}
+                style={{
+                  display: 'flex', flexDirection: 'column', gap: 14,
+                  padding: '32px 28px',
+                  background: 'var(--card)',
+                }}
+              >
+                <div style={{
+                  display: 'grid', placeItems: 'center',
+                  width: 42, height: 42,
+                  borderRadius: 'var(--radius-md)',
+                  background: item.accentBg,
+                  color: item.accent,
+                  border: `1px solid ${item.accentBg}`,
+                }} aria-hidden="true">
                   {item.icon}
-                </span>
-                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, letterSpacing: '-0.01em' }}>
+                </div>
+                <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, letterSpacing: '-0.01em' }}>
                   {item.title}
                 </h3>
                 <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: 0, lineHeight: 1.65 }}>
@@ -349,47 +545,64 @@ export default async function HomePage() {
       {/* ── ORGANIZER CTA ─────────────────────────────────────────────────── */}
       <section
         aria-labelledby="organizer-cta-heading"
-        style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px' }}
+        style={{ maxWidth: 1200, margin: '0 auto', padding: '100px 24px' }}
       >
-        <div
-          style={{
-            background: '#1e2318',
-            border: '1px solid #3a4228',
-            borderRadius: 'var(--radius-2xl)',
-            padding: 'clamp(40px, 6vw, 72px)',
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 40,
-            alignItems: 'center',
-          }}
-        >
-          <div>
-            <p
-              style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.22em',
-                color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 16,
-              }}
-            >
-              FOR ORGANIZERS
+        <div style={{
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #161d10 0%, #1e2a14 50%, #162010 100%)',
+          border: '1px solid #2e4020',
+          borderRadius: 'var(--radius-2xl)',
+          padding: 'clamp(48px, 6vw, 80px)',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: 48,
+          alignItems: 'center',
+        }}>
+          {/* BG decoration */}
+          <div aria-hidden="true" style={{
+            position: 'absolute', top: -80, right: -80,
+            width: 400, height: 400, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(215,243,106,0.06) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+          <div aria-hidden="true" style={{
+            position: 'absolute', bottom: -60, left: '40%',
+            width: 300, height: 300, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(215,243,106,0.03) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+
+          <div style={{ position: 'relative' }}>
+            <p style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.22em',
+              color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 18, margin: '0 0 18px',
+            }}>
+              For Organizers
             </p>
             <h2
               id="organizer-cta-heading"
               style={{
                 fontFamily: 'var(--font-serif)',
-                fontSize: 'clamp(28px, 4vw, 44px)',
+                fontSize: 'clamp(30px, 4vw, 50px)',
                 fontWeight: 400,
-                letterSpacing: '-0.02em',
-                margin: '0 0 14px',
+                letterSpacing: '-0.03em',
+                margin: '0 0 16px',
                 color: '#e8f0c8',
+                lineHeight: 1.05,
               }}
             >
               Sell tickets to your event<br />in minutes.
             </h2>
-            <p style={{ color: '#9aaa78', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px', maxWidth: 480 }}>
+            <p style={{ color: '#8aaa68', fontSize: 15, lineHeight: 1.7, margin: '0 0 32px', maxWidth: 460 }}>
               Create your event, set up ticket types, publish, and start selling. Stripe payments, QR check-in, and real-time analytics included.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link href="/register" className="button button-primary button-lg">
+              <Link
+                href="/register"
+                className="button button-primary button-lg"
+                style={{ boxShadow: '0 0 24px rgba(215,243,106,0.15)' }}
+              >
                 Start for free
               </Link>
               <Link href="/about" className="button button-ghost button-lg">
@@ -399,32 +612,31 @@ export default async function HomePage() {
           </div>
 
           {/* Stats block */}
-          <div
-            style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2,
-              borderRadius: 'var(--radius-lg)', overflow: 'hidden',
-              border: '1px solid #3a4228', flexShrink: 0,
-            }}
-          >
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr',
+            gap: 2,
+            borderRadius: 'var(--radius-xl)', overflow: 'hidden',
+            border: '1px solid #2e4020', flexShrink: 0,
+            background: '#2e4020',
+            position: 'relative',
+          }}>
             {[
               { value: '2 min', label: 'To create an event' },
               { value: '0%', label: 'Platform fee at start' },
-              { value: 'Real-time', label: 'Sales analytics' },
+              { value: 'Live', label: 'Sales analytics' },
               { value: 'QR', label: 'Check-in included' },
             ].map((stat) => (
-              <div
-                key={stat.label}
-                style={{
-                  padding: '24px 28px',
-                  background: '#232b1a',
-                  borderRight: '1px solid #3a4228',
-                  borderBottom: '1px solid #3a4228',
-                }}
-              >
-                <p style={{ fontFamily: 'var(--font-serif)', fontSize: 28, fontWeight: 400, margin: '0 0 4px', color: 'var(--primary)', letterSpacing: '-0.02em' }}>
+              <div key={stat.label} style={{
+                padding: '28px 32px',
+                background: '#1e2a14',
+              }}>
+                <p style={{
+                  fontFamily: 'var(--font-serif)', fontSize: 32, fontWeight: 400,
+                  margin: '0 0 6px', color: 'var(--primary)', letterSpacing: '-0.03em', lineHeight: 1,
+                }}>
                   {stat.value}
                 </p>
-                <p style={{ fontSize: 11, color: '#9aaa78', margin: 0, lineHeight: 1.3 }}>
+                <p style={{ fontSize: 11, color: '#7a9a68', margin: 0, lineHeight: 1.3 }}>
                   {stat.label}
                 </p>
               </div>

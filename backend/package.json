@@ -1,0 +1,16 @@
+{
+  "name": "northstar-backend-scripts",
+  "version": "1.0.0",
+  "description": "Backend scripts and utilities for Northstar event platform",
+  "private": true,
+  "scripts": {
+    "check": "node check-setup.js",
+    "seed": "node seed-demo.js",
+    "seed:demo": "node seed-demo.js",
+    "setup": "npm run check && npm run seed"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1"
+  }
+}

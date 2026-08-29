@@ -358,10 +358,16 @@ export async function getEventOrders(
 
   if (error) return { data: [], count: 0, page, pageSize: PAGE_SIZE, totalPages: 0 }
 
-  const mapped = (data ?? []).map((o) => ({
+  type RawOrder = {
+    buyer: { id: string; full_name: string | null; avatar_url: string | null }
+    order_items: Array<{ id: string }>
+    [key: string]: unknown
+  }
+
+  const mapped = ((data ?? []) as unknown as RawOrder[]).map((o) => ({
     ...o,
-    buyer:      o.buyer as Pick<Profile, 'id' | 'full_name' | 'avatar_url'>,
-    item_count: Array.isArray(o.order_items) ? (o.order_items as unknown[]).length : 0,
+    buyer:      o.buyer,
+    item_count: Array.isArray(o.order_items) ? o.order_items.length : 0,
   })) as unknown as Array<Order & { buyer: Pick<Profile, 'id' | 'full_name' | 'avatar_url'>; item_count: number }>
 
   return {

@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   description: 'Browse conferences, concerts, workshops, meetups, festivals and more.',
 }
 
+// Force dynamic rendering to ensure cookies() is called in request context
+export const dynamic = 'force-dynamic'
+
 interface EventsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }

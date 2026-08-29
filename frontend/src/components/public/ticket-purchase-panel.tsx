@@ -192,7 +192,7 @@ export function TicketPurchasePanel({
   }
 
   return (
-    <div className="panel" style={{ position: 'sticky', top: 84 }}>
+    <div className="panel">
 
       {/* Event date summary */}
       <div

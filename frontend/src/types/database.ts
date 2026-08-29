@@ -31,10 +31,13 @@ export type NotificationType =
   | 'ticket_transfer_received'
   | 'ticket_transfer_accepted'
   | 'ticket_transfer_rejected'
+  | 'ticket_transfer_cancelled'
   | 'event_updated'
   | 'event_cancelled'
   | 'rsvp_confirmed'
   | 'rsvp_waitlisted'
+  | 'waitlist_joined'
+  | 'waitlist_available'
 
 // ─── TABLE TYPES ─────────────────────────────────────────────────────────────
 

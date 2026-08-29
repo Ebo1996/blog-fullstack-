@@ -8,7 +8,7 @@ import type {
   TransferStatus,
 } from '@/types/database'
 
-type BadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'primary'
+type BadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'primary' | 'outline' | 'secondary'
 
 interface BadgeProps {
   variant?: BadgeVariant
@@ -23,6 +23,8 @@ const variantClass: Record<BadgeVariant, string> = {
   info: 'badge-info',
   neutral: 'badge-neutral',
   primary: 'badge-primary',
+  outline: 'badge-outline',
+  secondary: 'badge-secondary',
 }
 
 export function Badge({ variant = 'neutral', children, className }: BadgeProps) {

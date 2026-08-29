@@ -10,8 +10,13 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "format": "prettier --write ."
+    "test:e2e:ui": "playwright test --ui",
+    "format": "prettier --write .",
+    "security-check": "ts-node scripts/security-check.ts",
+    "a11y-check": "ts-node scripts/a11y-check.ts",
+    "pre-deploy": "npm run type-check && npm run lint && npm run test && npm run security-check"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",

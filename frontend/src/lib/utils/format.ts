@@ -42,6 +42,11 @@ export function formatDateShort(date: string | Date): string {
   return format(d, 'MMM d')
 }
 
+export function formatTime(date: string | Date): string {
+  const d = typeof date === 'string' ? parseISO(date) : date
+  return format(d, 'h:mm a')
+}
+
 export function formatDateRange(start: string | Date, end: string | Date): string {
   const s = typeof start === 'string' ? parseISO(start) : start
   const e = typeof end === 'string' ? parseISO(end) : end

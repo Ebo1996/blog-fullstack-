@@ -1,18 +1,18 @@
 import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { DashboardHeader } from '@/components/attendee/header'
+import { AttendeeHeader } from '@/components/attendee/header'
 import { TransfersClient } from '@/components/attendee/transfers-client'
-import { getMyTransfers, getUnreadNotificationCount } from '@/services/attendee'
+import { getIncomingTransfers, getOutgoingTransfers } from '@/services/transfers'
 import {
   acceptTransferAction,
   rejectTransferAction,
   cancelTransferAction,
 } from './actions'
 import type { Profile } from '@/types/database'
-import type { TransferWithDetails } from '@/types'
-import type { Metadata } from 'next'
+import type { TransferActionResult } from './actions'
 
-export const metadata: Metadata = { title: 'Transfers' }
+export const metadata: Metadata = { title: 'Transfers — Dashboard' }
 
 export default async function TransfersPage() {
   const supabase = await createClient()
@@ -21,51 +21,53 @@ export default async function TransfersPage() {
 
   const { data: profile } = await supabase
     .from('profiles').select('*').eq('id', user.id).single<Profile>()
+  if (!profile) redirect('/login')
 
-  const [transfers, unreadCount] = await Promise.all([
-    getMyTransfers(user.id),
-    getUnreadNotificationCount(user.id),
+  const [incoming, outgoing] = await Promise.all([
+    getIncomingTransfers(user.id),
+    getOutgoingTransfers(user.id),
   ])
 
-  const incoming = (transfers as TransferWithDetails[]).filter(
-    (t) => t.to_user_id === user.id,
-  )
-  const outgoing = (transfers as TransferWithDetails[]).filter(
-    (t) => t.from_user_id === user.id,
-  )
+  // Bind server actions
+  const boundAccept = async (id: string): Promise<TransferActionResult> => {
+    'use server'
+    return acceptTransferAction(id)
+  }
+  const boundReject = async (id: string): Promise<TransferActionResult> => {
+    'use server'
+    return rejectTransferAction(id)
+  }
+  const boundCancel = async (id: string): Promise<TransferActionResult> => {
+    'use server'
+    return cancelTransferAction(id)
+  }
 
   const pendingIncoming = incoming.filter((t) => t.status === 'pending').length
+  const pendingOutgoing = outgoing.filter((t) => t.status === 'pending').length
 
   return (
     <>
-      <DashboardHeader
+      <AttendeeHeader
         title="Transfers"
-        eyebrow="TICKET SHARING"
+        eyebrow="TICKET TRANSFERS"
         profile={profile}
-        unreadCount={unreadCount}
       />
 
       <main className="content">
-        <div className="page-intro">
-          <p>Share tickets with friends, without the group-chat chaos.</p>
-          {pendingIncoming > 0 && (
-            <span
-              className="badge badge-warning"
-              style={{ fontSize: 11 }}
-              aria-live="polite"
-            >
-              {pendingIncoming} pending
-            </span>
-          )}
+        <div className="page-intro" style={{ marginBottom: 20 }}>
+          <p>
+            {pendingIncoming > 0 && `${pendingIncoming} incoming transfer${pendingIncoming !== 1 ? 's' : ''} need your action. `}
+            {pendingOutgoing > 0 && `${pendingOutgoing} outgoing transfer${pendingOutgoing !== 1 ? 's' : ''} pending. `}
+            {pendingIncoming === 0 && pendingOutgoing === 0 && 'No pending transfers.'}
+          </p>
         </div>
 
         <TransfersClient
-          incoming={incoming}
-          outgoing={outgoing}
-          currentUserId={user.id}
-          acceptAction={acceptTransferAction}
-          rejectAction={rejectTransferAction}
-          cancelAction={cancelTransferAction}
+          incomingTransfers={incoming as never}
+          outgoingTransfers={outgoing as never}
+          acceptAction={boundAccept}
+          rejectAction={boundReject}
+          cancelAction={boundCancel}
         />
       </main>
     </>

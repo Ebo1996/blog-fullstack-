@@ -2,6 +2,26 @@
 
 This folder contains the Supabase database schema, migrations, seed data, and configuration for the Northstar Event Management & Ticketing Platform.
 
+## 🚀 Quick Start - Demo Data
+
+**Want to see the app with demo events right away?**
+
+1. Create a Supabase project at [app.supabase.com](https://app.supabase.com)
+2. Apply migrations (see below)
+3. Create an organizer account in your frontend
+4. Run the demo seed script:
+
+```bash
+cd backend
+npm install
+cp .env.example .env  # Add your Supabase credentials
+npm run seed
+```
+
+📖 **[Full Seeding Guide →](SEED-DEMO.md)**
+
+---
+
 ## Structure
 
 ```
@@ -22,6 +42,8 @@ backend/
 │   │   ├── 011_rls.sql
 │   │   └── 012_storage.sql
 │   └── seed.sql             ← Development seed data
+├── seed-demo.js             ← Demo data seed script
+├── SEED-DEMO.md             ← Seeding guide
 └── .env.example             ← Required environment variables
 ```
 
