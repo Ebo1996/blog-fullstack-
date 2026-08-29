@@ -1921,3 +1921,319 @@ img {
   border-color: rgba(124,106,245,0.4) !important;
   transform: translateY(-2px);
 }
+
+/* Featured events side card */
+.featured-side-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  flex: 1;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.featured-side-card:hover {
+  border-color: var(--border-strong);
+  background: var(--card-hover);
+}
+
+/* Category card on homepage */
+.category-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 140px;
+  padding: 20px;
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* =============================================================
+   PUBLIC PAGES — RESPONSIVE LAYOUT CLASSES
+   All grids that were inline styles, extracted to CSS classes
+   so media queries can override them.
+============================================================= */
+
+/* ── Site nav ────────────────────────────────────────────── */
+.site-nav-links { display: flex; }
+.site-nav-mobile-toggle { display: none; }
+
+/* ── Homepage stats bar ──────────────────────────────────── */
+.home-stats-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ── Homepage featured events (hero + side cards) ────────── */
+.home-featured-grid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 16px;
+}
+
+/* ── Homepage "Why Northstar" feature grid ───────────────── */
+.home-why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  background: var(--border);
+}
+
+/* ── Homepage organizer CTA ──────────────────────────────── */
+.home-cta-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: center;
+}
+.home-cta-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid #2e4020;
+  flex-shrink: 0;
+  background: #2e4020;
+  position: relative;
+}
+
+/* ── Events listing (filter sidebar + results) ───────────── */
+.events-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.events-filter-sidebar { display: block; }
+
+/* ── Event detail (content + ticket panel) ───────────────── */
+.event-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 40px;
+  align-items: start;
+}
+.event-detail-panel {
+  position: sticky;
+  top: 84px;
+}
+
+/* ── Loading skeleton ────────────────────────────────────── */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* =============================================================
+   MOBILE — max-width: 768px
+============================================================= */
+@media (max-width: 768px) {
+  /* Site nav: hide desktop links, show hamburger */
+  .site-nav-links        { display: none !important; }
+  .site-nav-mobile-toggle { display: flex !important; }
+
+  /* Stats bar: 2×2 on mobile */
+  .home-stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Featured events: single column */
+  .home-featured-grid { grid-template-columns: 1fr; }
+
+  /* Why section: single column, remove gap-border trick */
+  .home-why-grid {
+    grid-template-columns: 1fr;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    gap: 12px;
+  }
+  .home-why-grid > div {
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  /* Organizer CTA: stack vertically */
+  .home-cta-grid { grid-template-columns: 1fr; gap: 32px; }
+  .home-cta-stats { grid-template-columns: repeat(2, 1fr); flex-shrink: unset; }
+
+  /* Events listing: hide sidebar, go full width */
+  .events-layout          { grid-template-columns: 1fr; }
+  .events-filter-sidebar  { display: none; }
+
+  /* Event detail: single column, panel goes on top */
+  .event-detail-grid  { grid-template-columns: 1fr; gap: 24px; }
+  .event-detail-panel { position: static; top: auto; }
+  /* Put ticket panel before article content on mobile */
+  .event-detail-panel { order: -1; }
+
+  /* Skeleton */
+  .skeleton-grid { grid-template-columns: 1fr; }
+
+  /* Section headings — allow wrapping */
+  .public-section-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Reduce hero padding on mobile */
+  .home-hero {
+    min-height: auto !important;
+    padding: 80px 20px 64px !important;
+  }
+
+  /* Reduce section padding */
+  .home-section { padding-left: 20px !important; padding-right: 20px !important; }
+}
+
+/* =============================================================
+   SMALL MOBILE — max-width: 480px
+============================================================= */
+@media (max-width: 480px) {
+  /* Stats: single column */
+  .home-stats-grid  { grid-template-columns: 1fr; }
+  .home-cta-stats   { grid-template-columns: repeat(2, 1fr); }
+
+  /* Event detail: tighter padding */
+  .event-detail-page { padding: 20px 16px 60px !important; }
+}
+
+/* Desktop-only nav elements (CTAs) — hidden on mobile */
+.site-nav-desktop-only { display: inline-flex; }
+
+@media (max-width: 768px) {
+  .site-nav-desktop-only { display: none !important; }
+}
+
+/* ── Contact page layout ─────────────────────────────────── */
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 64px;
+}
+
+/* ── Category page layout ────────────────────────────────── */
+.category-layout {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 40px;
+}
+
+/* ── About stats reuse home-stats-grid — already defined ── */
+/* home-cta-grid reused on about page for organizer section  */
+
+@media (max-width: 768px) {
+  .contact-layout  { grid-template-columns: 1fr; gap: 32px; }
+  .category-layout { grid-template-columns: 1fr; }
+  /* Hide the category sidebar on mobile */
+  .category-layout > :last-child { display: none; }
+}
+
+/* =============================================================
+   HOME SEARCH BAR
+============================================================= */
+.home-search-form {
+  display: flex;
+  gap: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  max-width: 640px;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+}
+
+.home-search-city {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  min-width: 130px;
+  border-left: 1px solid var(--border);
+}
+
+.home-search-btn {
+  border-radius: 0;
+  min-height: 52px;
+  padding: 0 24px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* fix: home-cta-grid gap was removed from inline style */
+.home-cta-grid { gap: 48px; }
+
+@media (max-width: 768px) {
+  /* Search bar stacks vertically */
+  .home-search-form {
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+  }
+  .home-search-city {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    min-width: unset;
+    padding: 0 18px;
+  }
+  .home-search-btn {
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    width: 100%;
+    min-height: 48px;
+  }
+
+  /* footer bottom bar wraps */
+  .site-footer .bottom-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* =============================================================
+   ORGANIZER / ADMIN FORM GRIDS — RESPONSIVE
+   Form field pairs that use 1fr 1fr collapse to single column.
+============================================================= */
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .form-row-2col  { grid-template-columns: 1fr; }
+  .chart-grid-2col { grid-template-columns: 1fr; }
+}
+
+/* 3-column variant used by scanner stats */
+.chart-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .chart-grid-3col { grid-template-columns: 1fr; }
+}

@@ -96,7 +96,7 @@ export default async function AnalyticsPage({ params }: Props) {
             </div>
 
             {/* ── Two-column charts ────────────────────────────── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div className="chart-grid-2col">
 
               {/* Tickets by type */}
               <div className="panel">

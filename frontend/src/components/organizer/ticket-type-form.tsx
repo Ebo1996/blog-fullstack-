@@ -56,7 +56,7 @@ export function TicketTypeForm({
       </div>
 
       {/* Price */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="form-row-2col">
         <div className="form-group">
           <label className="form-label required" htmlFor="tt-price">Price</label>
           <div style={{ position: 'relative' }}>
@@ -105,7 +105,7 @@ export function TicketTypeForm({
       </div>
 
       {/* Sales window */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="form-row-2col">
         <div className="form-group">
           <label className="form-label" htmlFor="tt-start">Sales start <span style={{ color: 'var(--muted-foreground)', fontWeight: 400 }}>(optional)</span></label>
           <input

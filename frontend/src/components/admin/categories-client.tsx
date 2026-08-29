@@ -194,7 +194,7 @@ function CategoryForm({
     >
       {state.error && <Alert variant="error">{state.error}</Alert>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="form-row-2col">
         <div className="form-group">
           <label className="form-label required" htmlFor="cat-name">Name</label>
           <input

@@ -56,7 +56,7 @@ export default async function AdminAnalyticsPage() {
         </div>
 
         {/* ── Two-column: revenue + orders ─────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+        <div className="chart-grid-2col">
           <div className="panel">
             <div style={{ marginBottom: 16 }}>
               <div className="eyebrow" style={{ marginBottom: 6 }}>REVENUE</div>
@@ -79,7 +79,7 @@ export default async function AdminAnalyticsPage() {
         </div>
 
         {/* ── Events by status ─────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div className="chart-grid-2col">
           <div className="panel">
             <div style={{ marginBottom: 16 }}>
               <div className="eyebrow" style={{ marginBottom: 6 }}>EVENTS</div>

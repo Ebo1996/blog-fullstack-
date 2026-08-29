@@ -22,17 +22,7 @@ export function HomeSearch() {
       onSubmit={handleSubmit}
       role="search"
       aria-label="Search events"
-      style={{
-        display: 'flex',
-        gap: 0,
-        background: 'var(--card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-xl)',
-        overflow: 'hidden',
-        maxWidth: 640,
-        width: '100%',
-        boxShadow: 'var(--shadow-md)',
-      }}
+      className="home-search-form"
     >
       <label htmlFor="home-search-q" className="sr-only">Search events</label>
       <div style={{ display: 'flex', alignItems: 'center', flex: 1, padding: '0 18px', gap: 10, borderRight: '1px solid var(--border)' }}>
@@ -51,7 +41,7 @@ export function HomeSearch() {
         />
       </div>
       <label htmlFor="home-search-city" className="sr-only">City</label>
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8, minWidth: 140 }}>
+      <div className="home-search-city" style={{ display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8 }}>
         <MapPin size={15} style={{ color: 'var(--muted-foreground)', flexShrink: 0 }} aria-hidden="true" />
         <input
           id="home-search-city"
@@ -68,8 +58,7 @@ export function HomeSearch() {
       </div>
       <button
         type="submit"
-        className="button button-primary"
-        style={{ borderRadius: 0, minHeight: 52, padding: '0 24px', fontSize: 13 }}
+        className="button button-primary home-search-btn"
         aria-label="Search"
       >
         Search

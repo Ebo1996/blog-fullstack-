@@ -112,10 +112,8 @@ export default function AboutPage() {
         }}
       >
         <div
-          style={{
-            maxWidth: 1200, margin: '0 auto',
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0,
-          }}
+          style={{ maxWidth: 1200, margin: '0 auto' }}
+          className="home-stats-grid"
         >
           {stats.map((s, i) => (
             <div
@@ -267,11 +265,8 @@ export default function AboutPage() {
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-xl)',
             padding: 'clamp(36px, 5vw, 60px)',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 40,
-            alignItems: 'center',
           }}
+          className="home-cta-grid"
         >
           <div>
             <p className="eyebrow" style={{ marginBottom: 14 }}>FOR ORGANIZERS</p>

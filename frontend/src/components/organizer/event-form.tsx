@@ -86,7 +86,7 @@ export function EventForm({
         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 400, margin: '0 0 16px', letterSpacing: '-0.01em' }}>
           Date &amp; time
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="form-row-2col">
           <div className="form-group">
             <label className="form-label required" htmlFor="ef-start">Start date &amp; time</label>
             <input
@@ -128,7 +128,7 @@ export function EventForm({
               defaultValue={event?.venue_address ?? ''}
             />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="form-row-2col">
             <div className="form-group">
               <label className="form-label required" htmlFor="ef-city">City</label>
               <input

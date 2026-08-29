@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
   stripe,
+  stripeEnabled,
   buildLineItems,
   calculateFee,
   calculateTotal,
@@ -46,6 +47,13 @@ interface EventRow {
 
 export async function POST(request: Request) {
   try {
+    // ── 0. Guard: Stripe not configured ──────────────────────────────────
+    if (!stripeEnabled || !stripe) {
+      return NextResponse.json(
+        { error: 'Payments are not configured yet. Add your Stripe keys to .env.local to enable checkout.' },
+        { status: 503 },
+      )
+    }
     // ── 1. Parse + validate body ──────────────────────────────────────────
     const body = await request.json() as unknown
     const parsed = checkoutSchema.safeParse(body)

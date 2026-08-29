@@ -76,12 +76,28 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
         </Suspense>
       </div>
 
-      {/* Two-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 28, alignItems: 'start' }}>
+      {/* Active filters shown on mobile as chips */}
+      {(filters.category || filters.city) && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+          {filters.category && (
+            <a href="/events" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'rgba(215,243,106,0.08)', border: '1px solid rgba(215,243,106,0.2)', borderRadius: 99, fontSize: 11, color: 'var(--primary)', fontWeight: 600 }}>
+              {categories.find(c => c.slug === filters.category)?.name} ×
+            </a>
+          )}
+          {filters.city && (
+            <a href="/events" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'var(--muted)', border: '1px solid var(--border)', borderRadius: 99, fontSize: 11, color: 'var(--foreground)', fontWeight: 600 }}>
+              {filters.city} ×
+            </a>
+          )}
+        </div>
+      )}      {/* Two-column layout */}
+      <div className="events-layout">
         {/* Filter sidebar */}
-        <Suspense fallback={<div className="panel" style={{ height: 400 }} />}>
-          <EventsFilters categories={categories} cities={cities} />
-        </Suspense>
+        <div className="events-filter-sidebar">
+          <Suspense fallback={<div className="panel" style={{ height: 400 }} />}>
+            <EventsFilters categories={categories} cities={cities} />
+          </Suspense>
+        </div>
 
         {/* Results */}
         <div>
@@ -171,7 +187,7 @@ function PaginationWrapper({
 export function Loading() {
   return (
     <main style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px 80px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div className="skeleton-grid">
         {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
       </div>
     </main>

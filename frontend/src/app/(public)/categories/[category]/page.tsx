@@ -79,7 +79,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       </nav>
 
       {/* Two-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 40, alignItems: 'start' }}>
+      <div className="category-layout" style={{ alignItems: 'start' }}>
 
         {/* ── Main column ─────────────────────────────────────────────── */}
         <div>

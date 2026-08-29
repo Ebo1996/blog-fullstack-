@@ -37,6 +37,7 @@ export function TicketPurchasePanel({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [rsvpDone, setRsvpDone] = useState<'confirmed' | 'waitlisted' | null>(null)
+  const [stripeNotConfigured, setStripeNotConfigured] = useState(false)
 
   const activeTypes = ticketTypes.filter((t) => t.status !== 'inactive')
 
@@ -96,11 +97,15 @@ export function TicketPurchasePanel({
 
       const data = await res.json() as { url?: string; error?: string }
 
+      if (res.status === 503) {
+        setStripeNotConfigured(true)
+        return
+      }
+
       if (!res.ok || !data.url) {
         setError(data.error ?? 'Checkout failed. Please try again.')
         return
       }
-
       // Redirect to Stripe Checkout — no return value used
       window.location.href = data.url
     } catch {
@@ -191,6 +196,51 @@ export function TicketPurchasePanel({
     )
   }
 
+  // ─── Stripe not configured (demo mode) ───────────────────────────────────
+  if (stripeNotConfigured) {
+    return (
+      <div className="panel" style={{ textAlign: 'center', padding: '32px 24px' }}>
+        <div style={{
+          display: 'grid', placeItems: 'center',
+          width: 52, height: 52, borderRadius: 'var(--radius-lg)',
+          background: 'rgba(216,174,98,0.1)',
+          color: 'var(--warning)',
+          margin: '0 auto 16px',
+        }}>
+          <Lock size={24} aria-hidden="true" />
+        </div>
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 400, margin: '0 0 10px' }}>
+          Payments not configured
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: '0 0 8px', lineHeight: 1.6 }}>
+          This is a demo. To enable checkout, add your Stripe keys to{' '}
+          <code style={{ fontFamily: 'monospace', background: 'var(--muted)', padding: '1px 5px', borderRadius: 4 }}>
+            .env.local
+          </code>:
+        </p>
+        <div style={{
+          background: 'var(--muted)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)', padding: '12px 14px',
+          textAlign: 'left', fontSize: 11, fontFamily: 'monospace',
+          color: 'var(--muted-foreground)', lineHeight: 1.7, marginTop: 12,
+        }}>
+          <div style={{ color: 'var(--success)' }}>STRIPE_SECRET_KEY=sk_test_...</div>
+          <div>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...</div>
+        </div>
+        <a
+          href="https://dashboard.stripe.com/apikeys"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="button button-outline"
+          style={{ marginTop: 16, fontSize: 12, display: 'inline-flex', gap: 6 }}
+        >
+          Get Stripe keys →
+        </a>
+      </div>
+    )
+  }
+
+  // ─── Main panel ──────────────────────────────────────────────────────────
   return (
     <div className="panel">
 

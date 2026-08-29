@@ -5,14 +5,17 @@ if (typeof window !== 'undefined') {
   throw new Error('[stripe/index.ts] Must only be used server-side.')
 }
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing STRIPE_SECRET_KEY environment variable.')
-}
+const stripeKey = process.env.STRIPE_SECRET_KEY
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  // Use the version supported by installed stripe@17.7.0
-  apiVersion: '2025-02-24.acacia',
-})
+/** True when Stripe is properly configured with a real key */
+export const stripeEnabled =
+  !!stripeKey &&
+  stripeKey !== 'sk_test_...' &&
+  (stripeKey.startsWith('sk_test_') || stripeKey.startsWith('sk_live_'))
+
+export const stripe = stripeEnabled
+  ? new Stripe(stripeKey!, { apiVersion: '2025-02-24.acacia' })
+  : null
 
 // ─── Platform fee helpers ─────────────────────────────────────────────────────
 

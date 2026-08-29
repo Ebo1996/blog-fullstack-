@@ -63,7 +63,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const availabilityPct = totalCapacity ? Math.round((totalSold / totalCapacity) * 100) : null
 
   return (
-    <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px 80px' }}>
+    <main className="event-detail-page" style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px 80px' }}>
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" style={{ marginBottom: 24 }}>
         <ol style={{ display: 'flex', alignItems: 'center', gap: 6, listStyle: 'none', padding: 0, margin: 0, fontSize: 12, color: 'var(--muted-foreground)' }}>
@@ -79,7 +79,7 @@ export default async function EventPage({ params }: EventPageProps) {
         </ol>
       </nav>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 40, alignItems: 'start' }}>
+      <div className="event-detail-grid">
         {/* ── Left column ──────────────────────────────────────────────── */}
         <div>
           {/* Hero image / artwork */}
@@ -274,7 +274,7 @@ export default async function EventPage({ params }: EventPageProps) {
         </div>
 
         {/* ── Right column: ticket panel only, fully sticky ────────────── */}
-        <div style={{ position: 'sticky', top: 84 }}>
+        <div className="event-detail-panel">
           {isPast ? (
             <div className="panel" style={{ textAlign: 'center', padding: '32px 24px' }}>
               <p style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 400, margin: '0 0 8px' }}>

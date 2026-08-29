@@ -61,12 +61,7 @@ export default async function ScannerPage({ params }: Props) {
         )}
 
         {/* Live stats */}
-        <div
-          style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
-            gap: 12, marginBottom: 24,
-          }}
-        >
+        <div className="chart-grid-3col">
           {[
             { label: 'Checked in',  value: summary.checkedIn, color: 'var(--success)' },
             { label: 'Remaining',   value: summary.remaining, color: 'var(--foreground)' },

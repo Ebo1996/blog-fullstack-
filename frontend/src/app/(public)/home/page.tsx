@@ -225,12 +225,7 @@ export default async function HomePage() {
         borderBottom: '1px solid var(--border)',
         background: 'linear-gradient(90deg, rgba(215,243,106,0.02) 0%, transparent 50%, rgba(215,243,106,0.02) 100%)',
       }}>
-        <div style={{
-          maxWidth: 1200, margin: '0 auto',
-          padding: '0 24px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-        }}>
+        <div className="home-stats-grid">
           {stats.map((stat, i) => (
             <div
               key={stat.label}
@@ -286,24 +281,14 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 16 }}>
+          <div className="home-featured-grid">
             {heroEvent && <EventCardFeatured event={heroEvent} />}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {featuredRest.map((event, idx) => (
                 <Link
                   key={event.id}
                   href={`/events/${event.slug}`}
-                  style={{
-                    display: 'flex', gap: 14, alignItems: 'center',
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '14px 16px',
-                    flex: 1,
-                    transition: 'border-color 0.15s ease, background 0.15s ease',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--border-strong)'; (e.currentTarget as HTMLAnchorElement).style.background = 'var(--card-hover)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLAnchorElement).style.background = 'var(--card)' }}
+                  className="featured-side-card"
                 >
                   <div
                     className={`event-art event-art-small ${['event-violet', 'event-amber', 'event-teal'][idx % 3]}`}
@@ -407,24 +392,10 @@ export default async function HomePage() {
                   key={cat.id}
                   href={`/categories/${cat.slug}`}
                   aria-label={`Browse ${cat.name} events`}
+                  className="category-card"
                   style={{
-                    display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                    minHeight: 140,
-                    padding: '20px',
                     background: colors?.bg ?? 'var(--card)',
                     border: `1px solid ${colors?.border ?? 'var(--border)'}`,
-                    borderRadius: 'var(--radius-xl)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-3px)'
-                    ;(e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 12px 32px rgba(0,0,0,0.4)'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'
-                    ;(e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none'
                   }}
                 >
                   {/* Decorative dot */}
@@ -502,15 +473,7 @@ export default async function HomePage() {
             </h2>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 2,
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-2xl)',
-            overflow: 'hidden',
-            background: 'var(--border)',
-          }}>
+          <div className="home-why-grid">
             {whyItems.map((item) => (
               <div
                 key={item.title}
@@ -554,11 +517,9 @@ export default async function HomePage() {
           border: '1px solid #2e4020',
           borderRadius: 'var(--radius-2xl)',
           padding: 'clamp(48px, 6vw, 80px)',
-          display: 'grid',
-          gridTemplateColumns: '1fr auto',
-          gap: 48,
-          alignItems: 'center',
-        }}>
+        }}
+        className="home-cta-grid"
+        >
           {/* BG decoration */}
           <div aria-hidden="true" style={{
             position: 'absolute', top: -80, right: -80,
@@ -612,14 +573,7 @@ export default async function HomePage() {
           </div>
 
           {/* Stats block */}
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr',
-            gap: 2,
-            borderRadius: 'var(--radius-xl)', overflow: 'hidden',
-            border: '1px solid #2e4020', flexShrink: 0,
-            background: '#2e4020',
-            position: 'relative',
-          }}>
+          <div className="home-cta-stats">
             {[
               { value: '2 min', label: 'To create an event' },
               { value: '0%', label: 'Platform fee at start' },

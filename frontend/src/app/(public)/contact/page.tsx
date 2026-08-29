@@ -49,12 +49,8 @@ export default function ContactPage() {
   return (
     <main style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(48px, 8vh, 96px) 24px 80px' }}>
       <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1.2fr',
-          gap: 64,
-          alignItems: 'start',
-        }}
+        className="contact-layout"
+        style={{ alignItems: 'start' }}
       >
         {/* ── Left: info ──────────────────────────────────────────────── */}
         <div>
@@ -192,7 +188,7 @@ export default function ContactPage() {
               {/* Topic selector */}
               <div style={{ marginBottom: 20 }}>
                 <p className="form-label" style={{ marginBottom: 10 }}>Topic</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
                   {topics.map((t) => (
                     <button
                       key={t.value}
