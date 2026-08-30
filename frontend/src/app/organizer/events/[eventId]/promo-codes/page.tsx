@@ -34,7 +34,7 @@ export default async function PromoCodesPage({ params }: Props) {
     .from('events')
     .select('id, title, organizer_id')
     .eq('id', eventId)
-    .single()
+    .single<{ id: string; title: string; organizer_id: string }>()
 
   if (!event || event.organizer_id !== user.id) {
     redirect('/organizer/events')

@@ -29,7 +29,8 @@ export async function updateUserRoleAction(userId: string, newRole: 'attendee' |
   // Use admin RPC to update role — this bypasses RLS correctly
   const serviceClient = createServiceClient()
 
-  const { error } = await serviceClient.rpc('admin_set_user_role', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (serviceClient as any).rpc('admin_set_user_role', {
     target_user_id: userId,
     new_role: newRole,
   })

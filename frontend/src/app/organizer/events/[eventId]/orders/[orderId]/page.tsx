@@ -10,7 +10,7 @@ import { OrderStatusBadge } from '@/components/ui/badge'
 import { canRefundOrder, getOrderRefunds } from '@/services/refunds'
 import { formatDate, formatCurrency, formatOrderId } from '@/lib/utils/format'
 import { createRefundAction } from './actions'
-import type { Profile } from '@/types/database'
+import type { Profile, OrderStatus } from '@/types/database'
 import type { RefundActionResult } from './actions'
 
 interface Props {
@@ -52,7 +52,7 @@ export default async function OrderDetailPage({ params }: Props) {
     .single<{
       id: string
       user_id: string
-      status: string
+      status: OrderStatus
       subtotal: number
       fees: number
       total_amount: number
@@ -226,7 +226,7 @@ export default async function OrderDetailPage({ params }: Props) {
                       <span style={{ fontWeight: 600 }}>
                         {formatCurrency(ticket.ticket_type.price, ticket.ticket_type.currency)}
                       </span>
-                      <OrderStatusBadge status={ticket.status} />
+                      <OrderStatusBadge status={ticket.status as OrderStatus} />
                     </div>
                   </div>
                 ))}
