@@ -111,6 +111,11 @@ export default Sentry.withSentryConfig(nextConfig, {
   // Automatically tree-shake Sentry logger statements (reduces bundle size)
   disableLogger: true,
 
+  // Delete source maps after upload so they aren't served to users
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
   // Hides Sentry from client bundle size stats
   hideSourceMaps: true,
 
