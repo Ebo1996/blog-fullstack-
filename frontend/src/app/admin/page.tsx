@@ -8,7 +8,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { AdminHeader } from '@/components/admin/header'
 import { StatCard } from '@/components/ui/stat-card'
-import { EventStatusBadge, OrderStatusBadge } from '@/components/ui/badge'
+import { OrderStatusBadge } from '@/components/ui/badge'
 import { Avatar } from '@/components/ui/avatar'
 import { EmptyState } from '@/components/ui/empty-state'
 import { getPlatformStats, getRecentPlatformOrders } from '@/services/admin'

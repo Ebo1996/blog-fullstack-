@@ -44,7 +44,7 @@ export function PromoCodeDialog({ eventId, promoCode, open, onOpenChange, onSave
       } else {
         setError(result.error || 'Failed to save promo code')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An error occurred')
     } finally {
       setIsSubmitting(false)

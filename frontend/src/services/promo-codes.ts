@@ -3,7 +3,6 @@
  * Handles creation, validation, and application of promotional discount codes
  */
 
-import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
 export interface PromoCode {

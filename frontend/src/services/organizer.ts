@@ -8,7 +8,6 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { slugify } from '@/lib/utils/format'
 import type {
-  Event,
   EventStatus,
   TicketType,
   TicketTypeStatus,

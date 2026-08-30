@@ -9,14 +9,14 @@ import { Alert } from '@/components/ui/alert'
 import { ArrowLeft } from 'lucide-react'
 
 export default function ResetPasswordPage() {
-  const [state, action, pending] = useActionState(resetPasswordAction, {})
+  const [state, action, pending] = useActionState(resetPasswordAction, { error: undefined })
 
   return (
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <span className="brand-mark" aria-hidden="true">N</span>
-          northstar
+          <span style={{ fontSize: 20 }}>🎟️</span>
+          Eventify Ethiopia
         </div>
 
         <h1 className="auth-title">Set new password</h1>

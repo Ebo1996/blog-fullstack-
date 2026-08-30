@@ -5,7 +5,6 @@
  */
 
 import { createServiceClient } from '@/lib/supabase/service'
-import { formatNumber } from '@/lib/utils/format'
 
 export interface PublicPlatformStats {
   totalTicketsSold: number

@@ -442,7 +442,7 @@ export function SignOutButton({
     <div className="setting-row">
       <div>
         <strong>Sign out</strong>
-        <span>Sign out of your Northstar account on this device.</span>
+        <span>Sign out of your Eventify Ethiopia account on this device.</span>
       </div>
       <button
         type="button"

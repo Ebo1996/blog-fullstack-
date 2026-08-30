@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CheckCircle, Clock, Users, QrCode, ArrowUpRight } from 'lucide-react'
+import { CheckCircle, Clock, QrCode, ArrowUpRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { OrganizerHeader } from '@/components/organizer/header'
 import { EmptyState } from '@/components/ui/empty-state'

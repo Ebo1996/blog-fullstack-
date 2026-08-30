@@ -35,8 +35,8 @@ export function DashboardSidebar({ profile, ticketCount = 0 }: DashboardSidebarP
     <aside className="sidebar" aria-label="Dashboard navigation">
       {/* Brand */}
       <div className="brand">
-        <span className="brand-mark" aria-hidden="true">N</span>
-        <span>northstar</span>
+        <span style={{ fontSize: 18 }}>🎟️</span>
+        <span>Eventify Ethiopia</span>
       </div>
 
       {/* Workspace label */}

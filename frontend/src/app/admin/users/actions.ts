@@ -26,14 +26,13 @@ export async function updateUserRoleAction(userId: string, newRole: 'attendee' |
     throw new Error('Not authorized')
   }
 
-  // Use service client to directly update — bypasses RLS safely
-  // because we already verified the caller is admin above
+  // Use admin RPC to update role — this bypasses RLS correctly
   const serviceClient = createServiceClient()
 
-  const { error } = await serviceClient
-    .from('profiles')
-    .update({ role: newRole, updated_at: new Date().toISOString() })
-    .eq('id', userId)
+  const { error } = await serviceClient.rpc('admin_set_user_role', {
+    target_user_id: userId,
+    new_role: newRole,
+  })
 
   if (error) {
     console.error('[admin] updateUserRole:', error)

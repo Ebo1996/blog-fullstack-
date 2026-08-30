@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, User, Calendar, MapPin, Ticket as TicketIcon } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, Ticket as TicketIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { OrganizerHeader } from '@/components/organizer/header'

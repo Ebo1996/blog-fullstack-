@@ -6,7 +6,7 @@
  * It polls this endpoint until status = 'paid' or 'failed'.
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyPayment } from '@/lib/chapa'
 
@@ -50,7 +50,8 @@ export async function GET(req: NextRequest) {
     if (chapaStatus === 'success') {
       // Webhook may not have fired yet — trigger processing inline
       // (idempotent — the webhook handler will also run when it arrives)
-      const { error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
         .from('orders')
         .update({ status: 'paid', updated_at: new Date().toISOString() })
         .eq('id', orderId)
@@ -63,7 +64,8 @@ export async function GET(req: NextRequest) {
     }
 
     if (chapaStatus === 'failed') {
-      await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any)
         .from('orders')
         .update({ status: 'failed', updated_at: new Date().toISOString() })
         .eq('id', orderId)

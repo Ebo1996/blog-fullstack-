@@ -10,7 +10,7 @@
  * Docs: https://developer.chapa.co/docs/webhooks
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { verifyPayment, verifyChapaWebhookSignature } from '@/lib/chapa'
 import { sendOrderConfirmation, sendTicketDelivery } from '@/lib/email'

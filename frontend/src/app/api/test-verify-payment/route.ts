@@ -8,7 +8,7 @@
  * Body: { "tx_ref": "order_abc123_xyz789" }
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { verifyPayment } from '@/lib/chapa'
 

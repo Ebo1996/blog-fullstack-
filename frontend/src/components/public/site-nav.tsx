@@ -22,9 +22,9 @@ export function SiteNav() {
     <header className="site-nav" role="banner">
       <div className="site-nav-inner">
         {/* Brand */}
-        <Link href="/" className="brand" style={{ paddingBottom: 0, gap: 10, fontSize: 18 }} aria-label="Northstar home">
-          <span className="brand-mark" aria-hidden="true">N</span>
-          northstar
+        <Link href="/" className="brand" style={{ paddingBottom: 0, gap: 10, fontSize: 18 }} aria-label="Eventify Ethiopia home">
+          <span style={{ fontSize: 18 }}>🎟️</span>
+          Eventify Ethiopia
         </Link>
 
         {/* Desktop nav links — hidden on mobile via CSS */}
@@ -112,9 +112,9 @@ export function SiteNavAuthenticated({ role }: { role: string }) {
   return (
     <header className="site-nav" role="banner">
       <div className="site-nav-inner">
-        <Link href="/" className="brand" style={{ paddingBottom: 0, gap: 10, fontSize: 18 }} aria-label="Northstar home">
-          <span className="brand-mark" aria-hidden="true">N</span>
-          northstar
+        <Link href="/" className="brand" style={{ paddingBottom: 0, gap: 10, fontSize: 18 }} aria-label="Eventify Ethiopia home">
+          <span style={{ fontSize: 18 }}>🎟️</span>
+          Eventify Ethiopia
         </Link>
 
         {/* Desktop nav */}

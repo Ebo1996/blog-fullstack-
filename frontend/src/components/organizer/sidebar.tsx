@@ -5,9 +5,6 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   CalendarDays,
-  ShoppingBag,
-  Users,
-  BarChart2,
   Settings,
   MoreHorizontal,
   ChevronRight,
@@ -56,7 +53,7 @@ export function OrganizerSidebar({
         >
           N
         </span>
-        <span>northstar</span>
+        <span>Eventify Ethiopia</span>
       </div>
 
       <div className="workspace-label">ORGANIZER</div>

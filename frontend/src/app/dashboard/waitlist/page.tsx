@@ -27,7 +27,7 @@ export default async function WaitlistPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Waitlist</h1>
         <p className="text-muted-foreground">
-          Track your position in event waitlists. You'll be notified when tickets become available.
+          Track your position in event waitlists. You&apos;ll be notified when tickets become available.
         </p>
       </div>
 

@@ -4,8 +4,8 @@ import { ArrowUpRight, Ticket, Shield, Zap, BarChart2, Users, Globe } from 'luci
 import { getPublicPlatformStats } from '@/services/platform-stats'
 
 export const metadata: Metadata = {
-  title: 'About Northstar',
-  description: 'Northstar is an event management and ticketing platform built for organisers and attendees who care about great experiences.',
+  title: 'About Eventify Ethiopia',
+  description: 'Eventify Ethiopia is an event management and ticketing platform built for Ethiopian organizers and attendees.',
 }
 
 const timeline = [

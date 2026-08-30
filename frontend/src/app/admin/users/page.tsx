@@ -20,7 +20,7 @@ export default async function AdminUsersPage() {
   }
 
   // Check if user is admin
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single<{ role: string }>()
 
   if (!profile || profile.role !== 'admin') {
     redirect('/dashboard')

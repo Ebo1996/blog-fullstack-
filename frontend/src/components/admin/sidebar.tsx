@@ -39,7 +39,7 @@ export function AdminSidebar({ profile, reportCount = 0 }: AdminSidebarProps) {
         >
           N
         </span>
-        <span>northstar</span>
+        <span>Eventify Ethiopia</span>
       </div>
 
       <div className="workspace-label">ADMIN</div>

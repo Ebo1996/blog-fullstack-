@@ -27,7 +27,7 @@ class Logger {
 
   private log(level: LogLevel, message: string, meta?: Record<string, unknown>) {
     const timestamp = new Date().toISOString()
-    const logEntry = {
+    const _logEntry = {
       timestamp,
       level,
       message,

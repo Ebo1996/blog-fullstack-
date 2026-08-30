@@ -64,7 +64,7 @@ export function CheckoutForm({ event, ticketType, quantity, userId, waitlistId, 
     try {
       const result = await validatePromoCode(promoCode, event.id, quantity, subtotal)
       setPromoValidation(result)
-    } catch (error) {
+    } catch (_error) {
       setPromoValidation({
         valid: false,
         promoCodeId: null,
@@ -203,7 +203,7 @@ export function CheckoutForm({ event, ticketType, quantity, userId, waitlistId, 
         {waitlistId && (
           <div className="p-4 bg-blue-100 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100 rounded-lg">
             <p className="text-sm">
-              <strong>Waitlist Offer:</strong> You're purchasing from the waitlist. Complete your purchase within 24
+              <strong>Waitlist Offer:</strong> You&apos;re purchasing from the waitlist. Complete your purchase within 24
               hours.
             </p>
           </div>

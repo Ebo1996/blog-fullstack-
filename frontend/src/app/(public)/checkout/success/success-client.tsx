@@ -73,7 +73,7 @@ export function SuccessClient({
     } catch {
       // Network error — keep polling
     }
-  }, [orderId])
+  }, [orderId, txRef])
 
   useEffect(() => {
     if (!polling) return
@@ -506,7 +506,7 @@ function SuccessTimeout({ orderId }: { orderId: string }) {
 
         <p style={{ fontSize: 11, color: 'var(--muted-foreground)', marginTop: 20 }}>
           Reference: {orderId.slice(0, 8).toUpperCase()} ·{' '}
-          <a href="mailto:support@northstar.dev" style={{ color: 'var(--primary)' }}>
+          <a href="mailto:support@eventify-ethiopia.com" style={{ color: 'var(--primary)' }}>
             Contact support
           </a>
         </p>

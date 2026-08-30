@@ -313,9 +313,10 @@ export async function cancelTransfer(transferId: string): Promise<TransferResult
 
 // ─── GET USER TRANSFERS ───────────────────────────────────────────────────────
 
-export async function getIncomingTransfers(userId: string) {
+export async function getIncomingTransfers(userId: string): Promise<Record<string, unknown>[]> {
   const supabase = await createClient()
-  const { data } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
     .from('ticket_transfers')
     .select(`
       *,
@@ -333,9 +334,10 @@ export async function getIncomingTransfers(userId: string) {
   return data ?? []
 }
 
-export async function getOutgoingTransfers(userId: string) {
+export async function getOutgoingTransfers(userId: string): Promise<Record<string, unknown>[]> {
   const supabase = await createClient()
-  const { data } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
     .from('ticket_transfers')
     .select(`
       *,

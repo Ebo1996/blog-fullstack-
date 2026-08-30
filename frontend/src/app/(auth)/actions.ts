@@ -11,6 +11,7 @@ import {
 
 export interface AuthActionResult {
   error?: string
+  success?: boolean
 }
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
@@ -37,6 +38,9 @@ export async function loginAction(
 
   if (error) {
     // Deliberately vague — don't confirm whether email exists
+    if (error.message.toLowerCase().includes('email not confirmed')) {
+      return { error: 'Please verify your email address before signing in. Check your inbox for the verification link.' }
+    }
     return { error: 'Invalid email or password' }
   }
 
@@ -98,7 +102,8 @@ export async function registerAction(
     return { error: 'Registration failed. Please try again.' }
   }
 
-  redirect('/dashboard')
+  // Email confirmation is enabled — don't redirect, show "check your email" message
+  return { success: true }
 }
 
 // ─── FORGOT PASSWORD ──────────────────────────────────────────────────────────

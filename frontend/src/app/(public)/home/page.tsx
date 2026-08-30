@@ -8,7 +8,7 @@ import { HomeSearch } from '@/components/public/home-search'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Northstar — Discover events worth attending',
+  title: 'Eventify Ethiopia — Discover events worth attending',
   description: 'Find conferences, concerts, workshops, meetups, festivals and more.',
 }
 
@@ -460,7 +460,7 @@ export default async function HomePage() {
 
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
           <div style={{ textAlign: 'center', marginBottom: 72 }}>
-            <p className="eyebrow" style={{ marginBottom: 14 }}>WHY NORTHSTAR</p>
+            <p className="eyebrow" style={{ marginBottom: 14 }}>WHY EVENTIFY ETHIOPIA</p>
             <h2
               id="why-heading"
               style={{

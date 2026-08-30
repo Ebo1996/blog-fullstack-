@@ -33,10 +33,10 @@ export function SiteFooter() {
             href="/"
             className="brand"
             style={{ paddingBottom: 0, marginBottom: 16, display: 'inline-flex', fontSize: 17 }}
-            aria-label="Northstar home"
+            aria-label="Eventify Ethiopia home"
           >
-            <span className="brand-mark" style={{ marginRight: 10 }} aria-hidden="true">N</span>
-            northstar
+            <span style={{ fontSize: 18, marginRight: 10 }}>🎟️</span>
+            Eventify Ethiopia
           </Link>
           <p style={{ color: 'var(--muted-foreground)', fontSize: 13, lineHeight: 1.65, maxWidth: 260, margin: 0 }}>
             Discover events worth attending. The platform for organisers and attendees who care about great experiences.
@@ -94,7 +94,7 @@ export function SiteFooter() {
           fontSize: 12,
         }}
       >
-        <p style={{ margin: 0 }}>© {new Date().getFullYear()} Northstar. All rights reserved.</p>
+        <p style={{ margin: 0 }}>© {new Date().getFullYear()} Eventify Ethiopia. All rights reserved.</p>
         <div style={{ display: 'flex', gap: 20 }}>
           <Link href="/privacy" style={{ color: 'var(--muted-foreground)' }}>Privacy</Link>
           <Link href="/terms" style={{ color: 'var(--muted-foreground)' }}>Terms</Link>

@@ -4,10 +4,9 @@ import { getPublishedEvents, getEventCities } from '@/services/events'
 import { getAllCategories } from '@/services/categories'
 import { EventCard } from '@/components/public/event-card'
 import { EventsFilters, EventsSearchBar } from '@/components/public/events-filters'
-import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/ui/empty-state'
-import { SkeletonCard } from '@/components/ui/skeleton'
 import { CalendarDays } from 'lucide-react'
+import Link from 'next/link'
 import type { EventFilters } from '@/types'
 
 export const metadata: Metadata = {
@@ -80,14 +79,14 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       {(filters.category || filters.city) && (
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
           {filters.category && (
-            <a href="/events" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'rgba(215,243,106,0.08)', border: '1px solid rgba(215,243,106,0.2)', borderRadius: 99, fontSize: 11, color: 'var(--primary)', fontWeight: 600 }}>
+            <Link href="/events" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'rgba(215,243,106,0.08)', border: '1px solid rgba(215,243,106,0.2)', borderRadius: 99, fontSize: 11, color: 'var(--primary)', fontWeight: 600 }}>
               {categories.find(c => c.slug === filters.category)?.name} ×
-            </a>
+            </Link>
           )}
           {filters.city && (
-            <a href="/events" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'var(--muted)', border: '1px solid var(--border)', borderRadius: 99, fontSize: 11, color: 'var(--foreground)', fontWeight: 600 }}>
+            <Link href="/events" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', background: 'var(--muted)', border: '1px solid var(--border)', borderRadius: 99, fontSize: 11, color: 'var(--foreground)', fontWeight: 600 }}>
               {filters.city} ×
-            </a>
+            </Link>
           )}
         </div>
       )}      {/* Two-column layout */}
@@ -184,12 +183,3 @@ function PaginationWrapper({
   )
 }
 
-export function Loading() {
-  return (
-    <main style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px 80px' }}>
-      <div className="skeleton-grid">
-        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-      </div>
-    </main>
-  )
-}

@@ -186,7 +186,7 @@ export async function getAdminUsers(
 
   if (role) q = q.eq('role', role)
 
-  const { data: profiles, count } = await q as {
+  const { data: profiles, count: _count } = await q as {
     data: Array<{ id: string; full_name: string | null; avatar_url: string | null; role: UserRole; created_at: string }> | null
     count: number | null
   }

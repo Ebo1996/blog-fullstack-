@@ -7,7 +7,7 @@
  * Uploads user avatar to Supabase Storage
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
@@ -86,7 +86,8 @@ export async function POST(req: NextRequest) {
     const urlWithTimestamp = `${urlData.publicUrl}?t=${Date.now()}`
 
     // Update user profile
-    await service
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (service as any)
       .from('profiles')
       .update({
         avatar_url: urlWithTimestamp,

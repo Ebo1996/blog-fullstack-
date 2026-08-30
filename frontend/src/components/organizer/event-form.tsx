@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
 import type { ActionResult } from '@/app/organizer/events/actions'
@@ -175,9 +176,9 @@ export function EventForm({
         <Button type="submit" loading={pending} style={{ minWidth: 160 }}>
           {submitLabel}
         </Button>
-        <a href="/organizer/events" className="button button-outline">
+        <Link href="/organizer/events" className="button button-outline">
           Cancel
-        </a>
+        </Link>
       </div>
     </form>
   )

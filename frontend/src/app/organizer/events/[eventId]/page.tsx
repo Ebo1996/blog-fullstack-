@@ -11,7 +11,7 @@ import { EventStatusBadge } from '@/components/ui/badge'
 import { StatCard } from '@/components/ui/stat-card'
 import { EventStatusActions } from '@/components/organizer/event-status-actions'
 import { getOrganizerEventById } from '@/services/organizer'
-import { formatDate, formatDateRange, formatCurrency, formatNumber } from '@/lib/utils/format'
+import { formatDateRange, formatCurrency, formatNumber } from '@/lib/utils/format'
 import type { Profile } from '@/types/database'
 import type { Metadata } from 'next'
 

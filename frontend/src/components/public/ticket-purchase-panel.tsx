@@ -49,7 +49,7 @@ export function TicketPurchasePanel({
       const remaining = tt ? tt.quantity - tt.sold_quantity : 0
       const next = Math.max(0, Math.min(config.tickets.maxPerOrder, remaining, current + delta))
       if (next === 0) {
-        const { [id]: _removed, ...rest } = prev
+        const { [id]: _, ...rest } = prev
         return rest
       }
       return { ...prev, [id]: next }

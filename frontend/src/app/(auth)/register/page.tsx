@@ -6,22 +6,75 @@ import { registerAction } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/alert'
+import { Mail } from 'lucide-react'
 
 export default function RegisterPage() {
-  const [state, action, pending] = useActionState(registerAction, {})
+  const [state, action, pending] = useActionState(registerAction, { error: undefined })
 
+  // ── Email sent — show confirmation screen ──────────────────────────────────
+  if (state.success) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card" style={{ textAlign: 'center' }}>
+          {/* Icon */}
+          <div style={{
+            display: 'grid', placeItems: 'center',
+            width: 64, height: 64, borderRadius: 16,
+            background: 'rgba(215,243,106,0.12)', color: 'var(--primary)',
+            margin: '0 auto 24px',
+          }}>
+            <Mail size={28} aria-hidden="true" />
+          </div>
+
+          <h1 className="auth-title" style={{ marginBottom: 8 }}>
+            Check your email
+          </h1>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>
+            We sent a verification link to your email address.<br />
+            Click the link to activate your <strong>Eventify Ethiopia</strong> account.
+          </p>
+
+          <div style={{
+            background: 'var(--muted)', borderRadius: 10,
+            padding: '14px 18px', marginBottom: 24,
+            fontSize: 13, color: 'var(--muted-foreground)', lineHeight: 1.6,
+            textAlign: 'left',
+          }}>
+            <p style={{ margin: '0 0 6px', fontWeight: 600, color: 'var(--foreground)' }}>
+              Didn&apos;t receive it?
+            </p>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              <li>Check your spam or junk folder</li>
+              <li>Make sure you entered the correct email</li>
+              <li>The link expires in 24 hours</li>
+            </ul>
+          </div>
+
+          <Link
+            href="/login"
+            className="button button-outline"
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Register form ──────────────────────────────────────────────────────────
   return (
     <div className="auth-page">
       <div className="auth-card">
         {/* Brand */}
         <div className="auth-brand">
-          <span className="brand-mark" aria-hidden="true">N</span>
-          northstar
+          <span style={{ fontSize: 20 }}>🎟️</span>
+          Eventify Ethiopia
         </div>
 
         <h1 className="auth-title">Create account</h1>
         <p className="auth-subtitle">
-          Join thousands of people discovering events.
+          Join thousands of people discovering events in Ethiopia.
         </p>
 
         {state.error && (
@@ -37,7 +90,7 @@ export default function RegisterPage() {
             type="text"
             autoComplete="name"
             required
-            placeholder="Jordan Davis"
+            placeholder="Abebe Girma"
           />
 
           <Input

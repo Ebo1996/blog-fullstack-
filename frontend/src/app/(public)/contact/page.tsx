@@ -88,8 +88,8 @@ export default function ContactPage() {
                 <p style={{ fontSize: 12, color: 'var(--muted-foreground)', margin: '0 0 4px' }}>
                   For account, ticket, and payment issues.
                 </p>
-                <a href="mailto:support@northstar.dev" style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
-                  support@northstar.dev
+                <a href="mailto:support@eventify-ethiopia.com" style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
+                  support@eventify-ethiopia.com
                 </a>
               </div>
             </div>
@@ -111,8 +111,8 @@ export default function ContactPage() {
                 <p style={{ fontSize: 12, color: 'var(--muted-foreground)', margin: '0 0 4px' }}>
                   Need help setting up your first event?
                 </p>
-                <a href="mailto:organizers@northstar.dev" style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
-                  organizers@northstar.dev
+                <a href="mailto:organizers@eventify-ethiopia.com" style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
+                  organizers@eventify-ethiopia.com
                 </a>
               </div>
             </div>

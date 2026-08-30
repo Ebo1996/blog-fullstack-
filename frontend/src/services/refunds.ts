@@ -5,7 +5,6 @@
  */
 
 import { createRefund as createChapaRefund, centsToETB } from '@/lib/chapa'
-import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createNotification } from './notifications'
 import { sendRefundNotification } from '@/lib/email'
@@ -36,7 +35,6 @@ export async function createRefund(
   reason: string,
   organizerId: string,
 ): Promise<RefundResult> {
-  const supabase = await createClient()
   const service = createServiceClient()
 
   // 1. Get order details
@@ -211,7 +209,7 @@ export async function getOrganizerRefunds(
 ): Promise<Array<RefundDetails & { order: { id: string; user_id: string }; event: { title: string } }>> {
   const service = createServiceClient()
 
-  let query = service
+  const query = service
     .from('refunds')
     .select(`
       *,

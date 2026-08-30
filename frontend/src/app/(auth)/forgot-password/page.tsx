@@ -9,7 +9,7 @@ import { Alert } from '@/components/ui/alert'
 import { ArrowLeft, Mail } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
-  const [state, action, pending] = useActionState(forgotPasswordAction, {})
+  const [state, action, pending] = useActionState(forgotPasswordAction, { error: undefined })
   const sent = !pending && !state.error && state !== undefined && Object.keys(state).length === 0
 
   // Once submitted successfully, show confirmation UI
@@ -19,8 +19,8 @@ export default function ForgotPasswordPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <span className="brand-mark" aria-hidden="true">N</span>
-          northstar
+          <span style={{ fontSize: 20 }}>🎟️</span>
+          Eventify Ethiopia
         </div>
 
         {hasSubmitted ? (

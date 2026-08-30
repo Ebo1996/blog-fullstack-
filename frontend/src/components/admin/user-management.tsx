@@ -33,7 +33,7 @@ export function UserManagement({ users, onUpdateRole }: UserManagementProps) {
     setUpdatingUserId(user.id)
     try {
       await onUpdateRole(user.id, newRole)
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to update role')
     } finally {
       setUpdatingUserId(null)

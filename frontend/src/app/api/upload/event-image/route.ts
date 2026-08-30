@@ -7,7 +7,7 @@
  * Validates user is organizer and uploads to Supabase Storage
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { uploadEventImageServer } from '@/lib/storage'
 import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
@@ -71,7 +71,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Update event with new image URL
-    await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
       .from('events')
       .update({ image_url: result.url, updated_at: new Date().toISOString() })
       .eq('id', eventId)

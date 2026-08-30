@@ -1,182 +1,253 @@
-# Northstar — Event Management & Ticketing Platform
+# 🎟️ Eventify Ethiopia
 
-A production-quality, full-stack event management platform built with Next.js 15, Supabase, Stripe, and TypeScript.
+> The modern event ticketing platform built for Ethiopia.
 
-## Repository Structure
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-green?logo=supabase)](https://supabase.com)
+[![Chapa](https://img.shields.io/badge/Chapa-Payments-blue)](https://chapa.co)
+[![Resend](https://img.shields.io/badge/Resend-Email-purple)](https://resend.com)
+[![Sentry](https://img.shields.io/badge/Sentry-Monitoring-red?logo=sentry)](https://sentry.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://typescriptlang.org)
+
+---
+
+## 📌 What is Eventify Ethiopia?
+
+Eventify Ethiopia is a full-stack event management and ticketing platform built specifically for the Ethiopian market. It allows event organizers to create and publish events, sell tickets in Ethiopian Birr (ETB), and manage attendees — while giving attendees a seamless way to discover events, purchase tickets, and receive digital QR codes for entry.
+
+---
+
+## ✨ Features
+
+### For Attendees
+- Browse and discover events by category, city, and date
+- Purchase tickets securely with Chapa (Telebirr, bank transfer, cards)
+- Receive digital tickets with QR codes via email
+- Manage tickets, transfers, and RSVPs from a personal dashboard
+- Join waitlists for sold-out events
+
+### For Organizers
+- Create and publish events with rich details and images
+- Set up multiple ticket types with custom pricing in ETB
+- Real-time sales analytics and revenue tracking
+- Attendee management and CSV export
+- QR code scanner for event check-in
+- Process refunds directly through Chapa
+- Promo code management
+
+### For Admins
+- Platform-wide analytics and reporting
+- User management and role assignment
+- Category management
+- Full visibility across all events and orders
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|---|---|
+| **Next.js 15** | React framework with App Router and Server Actions |
+| **TypeScript** | Type-safe development throughout |
+| **Tailwind CSS** | Utility-first styling |
+| **Lucide React** | Modern icon library |
+| **React Hook Form + Zod** | Form handling with validation |
+| **Recharts** | Analytics charts and data visualization |
+| **QRCode.react** | QR code generation for tickets |
+| **html5-qrcode** | QR code scanning for check-in |
+
+### Backend & Infrastructure
+| Technology | Purpose |
+|---|---|
+| **Supabase** | PostgreSQL database, authentication, real-time, and storage |
+| **Supabase Auth** | User authentication with email verification |
+| **Supabase Storage** | Event images and avatar uploads |
+| **Row Level Security** | Database-level access control per user role |
+
+### Integrations
+| Service | Purpose |
+|---|---|
+| **Chapa** | Ethiopian payment gateway — accepts Telebirr, bank transfers, and cards in ETB |
+| **Resend** | Transactional email delivery — order confirmations, ticket delivery, refund notifications |
+| **Sentry** | Error monitoring and performance tracking in production |
+
+---
+
+## 🏗️ Project Structure
 
 ```
-/
-├── frontend/          ← Next.js 15 App Router application
-├── backend/           ← Supabase schema, migrations, seed data
-└── attendee-dashboard/  ← Original UI prototype (reference only)
+eventify-ethiopia/
+├── frontend/                    # Next.js 15 application
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── (auth)/          # Login, register, forgot/reset password
+│   │   │   ├── (public)/        # Home, events, categories, checkout
+│   │   │   ├── admin/           # Admin dashboard
+│   │   │   ├── organizer/       # Organizer dashboard
+│   │   │   ├── dashboard/       # Attendee dashboard
+│   │   │   └── api/             # API routes (checkout, webhooks, uploads)
+│   │   ├── components/          # Reusable UI components
+│   │   ├── lib/                 # Core utilities
+│   │   │   ├── chapa/           # Chapa payment integration
+│   │   │   ├── email/           # Resend email templates
+│   │   │   ├── storage/         # Supabase Storage helpers
+│   │   │   ├── supabase/        # Supabase client setup
+│   │   │   └── monitoring/      # Rate limiting and logging
+│   │   ├── services/            # Business logic layer
+│   │   └── types/               # TypeScript type definitions
+│   ├── sentry.client.config.ts  # Sentry browser config
+│   ├── sentry.server.config.ts  # Sentry server config
+│   └── next.config.ts           # Next.js + Sentry config
+└── backend/
+    └── supabase/
+        ├── migrations/          # 19 ordered SQL migration files
+        ├── combined_migration.sql # All migrations in one file
+        └── seed.sql             # Development seed data
 ```
 
 ---
 
-## Quick Start
+## 🚀 Getting Started
 
-### 1. Clone and install
+### Prerequisites
+- Node.js 18+
+- A [Supabase](https://supabase.com) project
+- A [Chapa](https://dashboard.chapa.co) account (Ethiopian payment gateway)
+- A [Resend](https://resend.com) account (for emails)
+- A [Sentry](https://sentry.io) project (for error monitoring)
 
+### 1. Clone the repository
 ```bash
-# Frontend
-cd frontend
-npm install
-cp .env.example .env.local
-# Fill in your Supabase + Stripe credentials
+git clone https://github.com/Ebo1996/eventify-ethiopia.git
+cd eventify-ethiopia
 ```
 
 ### 2. Set up the database
+Go to your **Supabase Dashboard → SQL Editor**, paste the contents of `backend/supabase/combined_migration.sql` and run it.
 
-See [backend/README.md](./backend/README.md) for full instructions.
-
-```bash
-# Push schema to your Supabase project
-cd backend
-supabase link --project-ref YOUR_PROJECT_REF
-supabase db push
-
-# Load seed data (dev only)
-psql "YOUR_SUPABASE_DB_URL" -f supabase/seed.sql
+Then run the storage policies:
+```sql
+-- Run in Supabase SQL Editor
+-- (already included in combined_migration.sql)
 ```
 
-### 3. Run the development server
+Grant permissions:
+```sql
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT ON public.events TO anon;
+GRANT SELECT ON public.event_categories TO anon;
+GRANT SELECT ON public.ticket_types TO anon;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
+```
 
+### 3. Configure environment variables
+Create `frontend/.env.local`:
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Chapa (Ethiopian Payment Gateway)
+CHAPA_SECRET_KEY=CHASECK_TEST-your-test-key
+
+# App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Email (Resend)
+RESEND_API_KEY=re_your-api-key
+
+# Error Monitoring (Sentry)
+NEXT_PUBLIC_SENTRY_DSN=https://your-dsn@sentry.io/project
+```
+
+### 4. Install and run
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-### Seed accounts
-
-| Email | Password | Role |
-|-------|----------|------|
-| admin@northstar.dev | Password1! | admin |
-| organizer@northstar.dev | Password1! | organizer |
-| attendee@northstar.dev | Password1! | attendee |
+Visit **http://localhost:3000** 🎉
 
 ---
 
-## Tech Stack
+## 👤 User Roles
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript (strict) |
-| Styling | Tailwind CSS v4 (CSS-first) |
-| Database | Supabase PostgreSQL |
-| Auth | Supabase Auth |
-| Storage | Supabase Storage |
-| Payments | Stripe Checkout + Webhooks |
-| Validation | Zod |
-| QR codes | qrcode + qrcode.react |
-| Charts | Recharts |
-| Icons | Lucide React |
+| Role | Access |
+|---|---|
+| `attendee` | Browse events, purchase tickets, manage personal dashboard |
+| `organizer` | All attendee access + create/manage events and ticket sales |
+| `admin` | Full platform access, user management, analytics |
+
+To make yourself admin, run in Supabase SQL Editor:
+```sql
+UPDATE public.profiles
+SET role = 'admin'
+WHERE email = 'your@email.com';
+```
 
 ---
 
-## Implementation Phases
+## 💳 Payment Flow (Chapa)
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| 1 — Architecture | ✅ Complete | Project setup, DB schema, RLS, auth, design system |
-| 2 — Public Website | 🔜 Next | Homepage, event discovery, event detail, categories |
-| 3 — Attendee Dashboard | 🔜 | Tickets, orders, RSVPs, transfers, notifications |
-| 4 — Organizer Dashboard | 🔜 | Event management, ticket types, scanner, analytics |
-| 5 — Stripe Payments | 🔜 | Checkout, webhooks, ticket generation |
-| 6 — Admin Dashboard | 🔜 | User management, events, reports, analytics |
-| 7 — Advanced Features | 🔜 | Promo codes, waitlists, email notifications |
-| 8 — Testing & Polish | 🔜 | Unit, integration, E2E, security review |
+1. Attendee selects tickets and clicks "Pay"
+2. Backend creates a pending order and calls Chapa's initialize API
+3. Attendee is redirected to Chapa's hosted checkout (Telebirr, bank, card)
+4. After payment, Chapa sends a webhook to `/api/webhooks/chapa`
+5. Webhook verifies payment via Chapa's verify API (HMAC signature checked)
+6. Order is marked as paid, tickets are generated with QR codes
+7. Confirmation email sent via Resend, tickets delivered via email
 
 ---
 
-## Phase 1 Deliverables
+## 📧 Email Notifications (Resend)
 
-### Frontend (`frontend/`)
+The following emails are sent automatically:
+- **Order confirmation** — when payment is successful
+- **Ticket delivery** — tickets with QR codes after payment
+- **Refund notification** — when a refund is processed
+- **Event updates** — when organizer sends an update to attendees
+- **Email verification** — on account registration (via Supabase SMTP)
 
-```
-src/
-├── app/
-│   ├── (auth)/              ← Login, register, forgot/reset password
-│   │   ├── actions.ts       ← Server actions (Zod-validated)
-│   │   ├── login/
-│   │   ├── register/
-│   │   ├── forgot-password/
-│   │   └── reset-password/
-│   ├── auth/callback/       ← OAuth + email confirmation handler
-│   ├── (public)/home/       ← Public homepage placeholder
-│   ├── dashboard/           ← Attendee dashboard (role-protected)
-│   ├── organizer/           ← Organizer dashboard (role-protected)
-│   ├── admin/               ← Admin dashboard (role-protected)
-│   ├── layout.tsx           ← Root layout + font loading
-│   ├── globals.css          ← Complete design system (extended from prototype)
-│   ├── error.tsx            ← Global error boundary
-│   └── not-found.tsx        ← 404 page
-│
-├── components/ui/           ← Design system components
-│   ├── button.tsx           ← Button (5 variants, loading state)
-│   ├── input.tsx            ← Input, Textarea, Select
-│   ├── badge.tsx            ← Badge + semantic status badges
-│   ├── skeleton.tsx         ← Skeleton + presets (card, table, stat)
-│   ├── empty-state.tsx      ← Empty state with actions
-│   ├── alert.tsx            ← Alert (info/success/warning/error)
-│   ├── tabs.tsx             ← Tabs + TabPanel (ARIA compliant)
-│   ├── dialog.tsx           ← Native <dialog> modal
-│   ├── table.tsx            ← DataTable with loading/empty states
-│   ├── avatar.tsx           ← Avatar with image + initials fallback
-│   ├── pagination.tsx       ← Pagination component
-│   └── stat-card.tsx        ← Stat card with delta indicator
-│
-├── lib/
-│   ├── supabase/
-│   │   ├── client.ts        ← Browser client (singleton)
-│   │   ├── server.ts        ← Server client (cookie-based)
-│   │   ├── service.ts       ← Service role (server-only, guarded)
-│   │   └── middleware.ts    ← Session refresh for Next.js middleware
-│   ├── auth/index.ts        ← requireAuth, requireRole, getProfile
-│   ├── validation/
-│   │   ├── auth.ts          ← Login, register, password schemas
-│   │   └── events.ts        ← Event, ticket type, checkout schemas
-│   └── utils/
-│       ├── cn.ts            ← clsx + tailwind-merge
-│       └── format.ts        ← Currency, date, number, string helpers
-│
-├── types/
-│   ├── database.ts          ← All DB table types + Database schema type
-│   └── index.ts             ← API results, pagination, filters, forms
-│
-├── config/index.ts          ← App-wide constants
-└── middleware.ts            ← Route protection + session refresh
-```
+---
 
-### Backend (`backend/`)
+## 🔒 Security
 
-```
-supabase/
-├── migrations/
-│   ├── 001_profiles.sql     ← Users, role enum, auto-create trigger
-│   ├── 002_categories.sql   ← Event categories
-│   ├── 003_events.sql       ← Events + compound indexes
-│   ├── 004_ticket_types.sql ← Ticket types + auto sold_out trigger
-│   ├── 005_orders.sql       ← Orders + order items
-│   ├── 006_tickets.sql      ← Tickets + purchase_tickets() + validate_and_checkin() RPCs
-│   ├── 007_registrations.sql← RSVPs with unique constraint
-│   ├── 008_transfers.sql    ← Ticket transfers + accept_ticket_transfer() RPC
-│   ├── 009_check_ins.sql    ← Immutable check-in audit trail
-│   ├── 010_notifications.sql← In-app notifications
-│   ├── 011_rls.sql          ← Full Row Level Security (deny-by-default)
-│   └── 012_storage.sql      ← event-images + avatars buckets + policies
-└── seed.sql                 ← 3 users, 10 categories, 7 events, 13 ticket types, orders, tickets
-```
+- **Row Level Security (RLS)** — every table has policies, default deny
+- **HMAC webhook verification** — Chapa webhooks verified with signature
+- **Rate limiting** — all critical API endpoints protected
+- **Content Security Policy** — XSS protection headers
+- **Input validation** — Zod schemas on all API routes and forms
+- **Email enumeration protection** — auth errors are deliberately vague
+- **Source map deletion** — source maps uploaded to Sentry then deleted
 
-### Key Security Properties
+---
 
-- Every table has RLS enabled with deny-by-default
-- Ticket inventory protected by `FOR UPDATE` row locks in `purchase_tickets()` RPC
-- Check-in atomicity guaranteed by `FOR UPDATE` in `validate_and_checkin()` RPC
-- QR tokens are 48-character cryptographically random hex strings
-- Role escalation blocked at DB level — only `admin_set_user_role()` RPC can change roles
-- Service role key is server-only, guarded by a `typeof window` check
-- Auth server actions return deliberately vague error messages
-- Storage paths enforce ownership via path-prefix matching in policies
+## 🌍 Deployment
+
+### Deploy to Vercel (Recommended)
+1. Push to GitHub
+2. Connect repo to [Vercel](https://vercel.com)
+3. Set root directory to `frontend`
+4. Add all environment variables
+5. Deploy
+
+### Switch to live Chapa key for production
+Replace `CHASECK_TEST-...` with your live `CHASECK-...` key from [dashboard.chapa.co](https://dashboard.chapa.co).
+
+---
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+**Built with ❤️ in Ethiopia 🇪🇹**
+
+*Empowering Ethiopian event organizers with modern ticketing technology.*

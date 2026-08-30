@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
 function LoginForm() {
-  const [state, action, pending] = useActionState(loginAction, {})
+  const [state, action, pending] = useActionState(loginAction, { error: undefined })
   const searchParams = useSearchParams()
   const resetSuccess = searchParams.get('reset') === 'success'
 
@@ -19,12 +19,12 @@ function LoginForm() {
       <div className="auth-card">
         {/* Brand */}
         <div className="auth-brand">
-          <span className="brand-mark" aria-hidden="true">N</span>
-          northstar
+          <span style={{ fontSize: 20 }}>🎟️</span>
+          Eventify Ethiopia
         </div>
 
         <h1 className="auth-title">Welcome back</h1>
-        <p className="auth-subtitle">Sign in to your account to continue.</p>
+        <p className="auth-subtitle">Sign in to your Eventify Ethiopia account.</p>
 
         {resetSuccess && (
           <Alert variant="success" className="mb-4">

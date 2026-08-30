@@ -14,10 +14,10 @@ interface JoinWaitlistButtonProps {
 }
 
 export function JoinWaitlistButton({
-  eventId,
-  ticketTypeId,
-  ticketTypeName,
-  quantity = 1,
+  eventId: _eventId,
+  ticketTypeId: _ticketTypeId,
+  ticketTypeName: _ticketTypeName,
+  quantity: _quantity = 1,
   onJoin,
 }: JoinWaitlistButtonProps) {
   const [isLoading, setIsLoading] = useState(false)

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowUpRight, CalendarDays, CreditCard,
-  Plus, TrendingUp, Ticket, Users, BarChart2,
+  Plus, TrendingUp, Ticket, BarChart2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { OrganizerHeader } from '@/components/organizer/header'

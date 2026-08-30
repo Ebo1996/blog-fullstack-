@@ -40,7 +40,7 @@ export function WaitlistEntries({ entries, onRemove }: WaitlistEntriesProps) {
         <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No Waitlist Entries</h3>
         <p className="text-muted-foreground">
-          You're not on any event waitlists. Browse events to join a waitlist when tickets are sold out.
+          You&apos;re not on any event waitlists. Browse events to join a waitlist when tickets are sold out.
         </p>
       </div>
     )
