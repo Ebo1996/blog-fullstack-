@@ -95,7 +95,9 @@ export function TicketPurchasePanel({
         body:    JSON.stringify({ eventId, items }),
       })
 
-      const data = await res.json() as { url?: string; error?: string; provider?: string }
+      const data = await res.json() as { url?: string; error?: string; provider?: string; hint?: string }
+
+      console.log('[checkout] Response:', { status: res.status, data })
 
       if (res.status === 503) {
         setStripeNotConfigured(true)
@@ -107,8 +109,10 @@ export function TicketPurchasePanel({
         return
       }
       // Redirect to Chapa hosted checkout page
+      console.log('[checkout] Redirecting to:', data.url)
       window.location.href = data.url
-    } catch {
+    } catch (err) {
+      console.error('[checkout] Catch block error:', err)
       setError('Network error. Please check your connection and try again.')
     } finally {
       setCheckoutLoading(false)
@@ -426,7 +430,7 @@ export function TicketPurchasePanel({
         >
           <ShoppingCart size={16} aria-hidden="true" />
           {checkoutLoading
-            ? 'Redirecting to Stripe…'
+            ? 'Redirecting to Chapa…'
             : !isAuthenticated && totalItems > 0
               ? 'Sign in to purchase'
               : totalItems === 0

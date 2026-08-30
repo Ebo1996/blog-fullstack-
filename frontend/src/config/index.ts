@@ -15,9 +15,9 @@ export const config = {
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   },
 
-  stripe: {
-    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-    // secretKey and webhookSecret are server-only — accessed directly from env
+  chapa: {
+    // Secret key is server-only — accessed directly from env
+    enabled: !!process.env.CHAPA_SECRET_KEY,
   },
 
   pagination: {

@@ -100,8 +100,8 @@ export interface Order {
   id: string
   user_id: string
   event_id: string
-  stripe_checkout_session_id: string | null
-  stripe_payment_intent_id: string | null
+  payment_tx_ref: string | null
+  payment_reference: string | null
   status: OrderStatus
   subtotal: number
   fees: number

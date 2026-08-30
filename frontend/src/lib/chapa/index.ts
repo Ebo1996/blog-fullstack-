@@ -152,3 +152,62 @@ export function buildTxRef(orderId: string): string {
   // Format: ns-<first8charsOfOrderId>-<timestamp>
   return `ns-${orderId.slice(0, 8)}-${Date.now()}`
 }
+
+// ─── Refund API ───────────────────────────────────────────────────────────────
+
+export interface ChapaRefundRequest {
+  tx_ref: string
+  amount?: number  // Optional: partial refund in ETB. Omit for full refund
+  reason?: string
+}
+
+export interface ChapaRefundResponse {
+  message: string
+  status: 'success' | 'failed'
+  data: {
+    id: string
+    tx_ref: string
+    amount: number
+    currency: string
+    status: 'pending' | 'success' | 'failed'
+    created_at: string
+  } | null
+}
+
+/**
+ * Initiate a refund with Chapa
+ * 
+ * Docs: https://developer.chapa.co/docs/refunds
+ * Note: Chapa refunds may take 5-10 business days to process
+ */
+export async function createRefund(params: ChapaRefundRequest): Promise<ChapaRefundResponse> {
+  const url = `${CHAPA_BASE_URL}/refund`
+
+  const body: Record<string, unknown> = {
+    tx_ref: params.tx_ref,
+  }
+
+  if (params.amount) {
+    body.amount = params.amount.toFixed(2)
+  }
+
+  if (params.reason) {
+    body.reason = params.reason
+  }
+
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: {
+      Authorization: `Bearer ${CHAPA_SECRET_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Chapa refund failed (${res.status}): ${text}`)
+  }
+
+  return res.json() as Promise<ChapaRefundResponse>
+}

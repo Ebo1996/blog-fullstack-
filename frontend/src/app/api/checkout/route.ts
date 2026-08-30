@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -10,6 +10,7 @@ import {
   centsToETB,
   buildTxRef,
 } from '@/lib/chapa'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
 // ─── Request schema ───────────────────────────────────────────────────────────
 const checkoutSchema = z.object({
@@ -46,23 +47,34 @@ interface EventRow {
   status: string
 }
 
-export async function POST(request: Request) {
-  try {
-    // ── 0. Guard: Chapa not configured ────────────────────────────────────
-    if (!chapaEnabled) {
-      return NextResponse.json(
-        {
-          error:    'Payments are not configured yet.',
-          provider: 'chapa',
-          hint:     'Add CHAPA_SECRET_KEY to .env.local. Get your key at dashboard.chapa.co',
-        },
-        { status: 503 },
-      )
-    }
+export async function POST(request: NextRequest) {
+  // Get user IP for rate limiting
+  const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'anonymous'
+  
+  return withRateLimit(
+    `checkout:${ip}`,
+    RATE_LIMITS.CHECKOUT,
+    async () => {
+      try {
+        // ── 0. Guard: Chapa not configured ────────────────────────────────────
+        console.log('[checkout] chapaEnabled:', chapaEnabled)
+        console.log('[checkout] CHAPA_SECRET_KEY exists:', !!process.env.CHAPA_SECRET_KEY)
+        console.log('[checkout] CHAPA_SECRET_KEY prefix:', process.env.CHAPA_SECRET_KEY?.substring(0, 15))
+        
+        if (!chapaEnabled) {
+          return NextResponse.json(
+            {
+              error:    'Payments are not configured yet.',
+              provider: 'chapa',
+              hint:     'Add CHAPA_SECRET_KEY to .env.local. Get your key at dashboard.chapa.co',
+            },
+            { status: 503 },
+          )
+        }
 
-    // ── 1. Parse + validate body ──────────────────────────────────────────
-    const body = await request.json() as unknown
-    const parsed = checkoutSchema.safeParse(body)
+        // ── 1. Parse + validate body ──────────────────────────────────────────
+        const body = await request.json() as unknown
+        const parsed = checkoutSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? 'Invalid request' },
@@ -198,7 +210,7 @@ export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (service as any)
       .from('orders')
-      .update({ stripe_checkout_session_id: txRef }) // reusing the column to store tx_ref
+      .update({ payment_tx_ref: txRef })
       .eq('id', orderId)
 
     // ── 8. Initialize Chapa payment ───────────────────────────────────────
@@ -206,6 +218,7 @@ export async function POST(request: Request) {
     const callbackUrl = `${appUrl}/api/webhooks/chapa`
     const returnUrl   = `${appUrl}/checkout/success?tx_ref=${txRef}&order_id=${orderId}`
 
+    // Chapa validation: very strict - use simple generic title
     const chapaResponse = await initializePayment({
       amount:      totalETB,
       currency:    'ETB',
@@ -216,8 +229,8 @@ export async function POST(request: Request) {
       callback_url: callbackUrl,
       return_url:  returnUrl,
       customization: {
-        title:       `Tickets — ${event.title}`,
-        description: lineItems.map((i) => `${i.quantity}× ${i.name}`).join(', '),
+        title:       'Event Tickets',
+        description: `Order ${orderId.substring(0, 8)}`,
       },
     })
 
@@ -245,4 +258,6 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
+    },
+  )
 }

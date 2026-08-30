@@ -13,20 +13,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { verifyPayment } from '@/lib/chapa'
+import { sendOrderConfirmation, sendTicketDelivery } from '@/lib/email'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
 export async function POST(req: NextRequest) {
-  let body: { tx_ref?: string; status?: string } = {}
+  // Rate limit by IP
+  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'chapa-webhook'
+  
+  return withRateLimit(
+    `webhook:${ip}`,
+    RATE_LIMITS.WEBHOOK,
+    async () => {
+      let body: { tx_ref?: string; status?: string } = {}
 
-  try {
-    body = await req.json() as { tx_ref?: string; status?: string }
-  } catch {
-    return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
-  }
+      try {
+        body = await req.json() as { tx_ref?: string; status?: string }
+      } catch {
+        return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+      }
 
-  const txRef = body.tx_ref
-  if (!txRef) {
-    return NextResponse.json({ error: 'Missing tx_ref' }, { status: 400 })
-  }
+      const txRef = body.tx_ref
+      if (!txRef) {
+        return NextResponse.json({ error: 'Missing tx_ref' }, { status: 400 })
+      }
 
   // ── 1. Verify with Chapa — never trust webhook body alone ────────────────
   let verified
@@ -45,7 +54,7 @@ export async function POST(req: NextRequest) {
     await (service as any)
       .from('orders')
       .update({ status: 'failed', updated_at: new Date().toISOString() })
-      .eq('stripe_checkout_session_id', txRef)
+      .eq('payment_tx_ref', txRef)
       .eq('status', 'pending')
     return NextResponse.json({ received: true })
   }
@@ -56,7 +65,7 @@ export async function POST(req: NextRequest) {
   const { data: order, error: orderErr } = await service
     .from('orders')
     .select('id, user_id, event_id, status, subtotal, total_amount, currency')
-    .eq('stripe_checkout_session_id', txRef)
+    .eq('payment_tx_ref', txRef)
     .single<{
       id: string
       user_id: string
@@ -119,7 +128,7 @@ export async function POST(req: NextRequest) {
     .update({
       status:     'paid',
       updated_at: new Date().toISOString(),
-      stripe_payment_intent_id: verified.data.reference, // store Chapa reference
+      payment_reference: verified.data.reference, // store Chapa reference
     })
     .eq('id', order.id)
     .eq('status', 'pending')
@@ -174,6 +183,80 @@ export async function POST(req: NextRequest) {
       data:    { order_id: order.id },
     },
   ])
+
+  // ── 6. Send email notifications ───────────────────────────────────────────
+  // Get user and event details for emails
+  const { data: profile } = await service
+    .from('profiles')
+    .select('full_name, id')
+    .eq('id', order.user_id)
+    .single<{ full_name: string | null; id: string }>()
+
+  const { data: event } = await service
+    .from('events')
+    .select('title, slug, start_at, venue_name')
+    .eq('id', order.event_id)
+    .single<{ title: string; slug: string; start_at: string; venue_name: string | null }>()
+
+  const { data: userAuth } = await service.auth.admin.getUserById(order.user_id)
+  const userEmail = userAuth?.user?.email
+
+  if (userEmail && profile && event) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    
+    // Send order confirmation
+    await sendOrderConfirmation(userEmail, {
+      customerName: profile.full_name ?? 'there',
+      eventTitle: event.title,
+      eventDate: new Date(event.start_at).toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      eventVenue: event.venue_name ?? 'TBA',
+      orderNumber: order.id.substring(0, 8).toUpperCase(),
+      ticketCount: ticketInserts.length,
+      totalAmount: totalFormatted,
+      myTicketsUrl: `${appUrl}/dashboard/tickets`,
+    })
+
+    // Send ticket delivery with ticket codes
+    if (ticketInserts.length > 0) {
+      // Get ticket type names
+      const ticketTypeIds = [...new Set(ticketInserts.map(t => t.ticket_type_id))]
+      const { data: ticketTypes } = await service
+        .from('ticket_types')
+        .select('id, name')
+        .in('id', ticketTypeIds)
+
+      const ticketTypeMap = new Map(
+        (ticketTypes ?? []).map((tt: { id: string; name: string }) => [tt.id, tt.name])
+      )
+
+      await sendTicketDelivery(userEmail, {
+        customerName: profile.full_name ?? 'there',
+        eventTitle: event.title,
+        eventDate: new Date(event.start_at).toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        eventVenue: event.venue_name ?? 'TBA',
+        tickets: ticketInserts.map(t => ({
+          typeName: ticketTypeMap.get(t.ticket_type_id) ?? 'Ticket',
+          ticketCode: t.ticket_code,
+          qrUrl: `${appUrl}/ticket/${t.qr_token}`,
+        })),
+        myTicketsUrl: `${appUrl}/dashboard/tickets`,
+      })
+    }
+  }
 
   console.log(`[chapa-webhook] Payment confirmed for order ${order.id}, tx_ref: ${txRef}`)
   return NextResponse.json({ received: true })

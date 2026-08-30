@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Enable instrumentation for environment validation
+  experimental: {
+    instrumentationHook: true,
+  },
+
   // Image optimization
   images: {
     remotePatterns: [
@@ -64,10 +69,6 @@ const nextConfig: NextConfig = {
   // Production optimizations
   poweredByHeader: false,
   compress: true,
-
-  experimental: {
-    // Server actions are stable in Next 15
-  },
 }
 
 export default nextConfig

@@ -1,13 +1,14 @@
 /**
  * Refund service
- * Handles Stripe refunds, order status updates, and ticket cancellation
+ * Handles Chapa refunds, order status updates, and ticket cancellation
  * Creates audit trail for all refund operations
  */
 
-import { stripe } from '@/lib/stripe'
+import { createRefund as createChapaRefund, centsToETB } from '@/lib/chapa'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createNotification } from './notifications'
+import { sendRefundNotification } from '@/lib/email'
 
 export interface RefundResult {
   success: boolean
@@ -22,7 +23,7 @@ export interface RefundDetails {
   currency: string
   reason: string | null
   status: 'pending' | 'succeeded' | 'failed'
-  stripe_refund_id: string | null
+  payment_refund_id: string | null
   created_at: string
   created_by: string
 }
@@ -45,7 +46,8 @@ export async function createRefund(
       id,
       user_id,
       event_id,
-      stripe_payment_intent_id,
+      payment_tx_ref,
+      payment_reference,
       total_amount,
       currency,
       status,
@@ -56,7 +58,8 @@ export async function createRefund(
       id: string
       user_id: string
       event_id: string
-      stripe_payment_intent_id: string | null
+      payment_tx_ref: string | null
+      payment_reference: string | null
       total_amount: number
       currency: string
       status: string
@@ -82,32 +85,29 @@ export async function createRefund(
     return { success: false, error: 'Invalid refund amount' }
   }
 
-  // 5. Verify we have a payment intent ID
-  if (!order.stripe_payment_intent_id) {
-    return { success: false, error: 'No payment intent found for this order' }
+  // 5. Verify we have a tx_ref (stored in payment_tx_ref)
+  const txRef = order.payment_tx_ref
+  if (!txRef) {
+    return { success: false, error: 'No payment reference found for this order' }
   }
 
-  // 6. Create Stripe refund
-  let stripeRefund
+  // 6. Create Chapa refund (amount must be in ETB, not cents)
+  const amountETB = centsToETB(amount)
+  let chapaRefund
   try {
-    stripeRefund = await stripe.refunds.create({
-      payment_intent: order.stripe_payment_intent_id,
-      amount: Math.round(amount * 100), // Stripe expects cents
-      reason: 'requested_by_customer',
-      metadata: {
-        order_id: orderId,
-        organizer_id: organizerId,
-        reason: reason.slice(0, 500), // Stripe metadata limit
-      },
+    chapaRefund = await createChapaRefund({
+      tx_ref: txRef,
+      amount: amountETB,
+      reason: reason.slice(0, 500),
     })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Stripe refund failed'
-    console.error('[refunds] Stripe refund error:', msg)
+    const msg = err instanceof Error ? err.message : 'Chapa refund failed'
+    console.error('[refunds] Chapa refund error:', msg)
     return { success: false, error: msg }
   }
 
-  if (stripeRefund.status === 'failed') {
-    return { success: false, error: 'Stripe refund failed' }
+  if (chapaRefund.status === 'failed' || !chapaRefund.data) {
+    return { success: false, error: 'Chapa refund failed' }
   }
 
   // 7. Determine if full or partial refund
@@ -148,8 +148,8 @@ export async function createRefund(
       amount,
       currency: order.currency,
       reason,
-      status: stripeRefund.status === 'succeeded' ? 'succeeded' : 'pending',
-      stripe_refund_id: stripeRefund.id,
+      status: chapaRefund.data.status === 'success' ? 'succeeded' : 'pending',
+      payment_refund_id: chapaRefund.data.id,
       created_by: organizerId,
     })
     .select('id')
@@ -164,17 +164,29 @@ export async function createRefund(
     order.user_id,
     'payment_completed', // Could create a specific refund type
     isFullRefund ? 'Refund processed' : 'Partial refund processed',
-    `${isFullRefund ? 'Full refund' : `Refund of ${formatAmount(amount, order.currency)}`} for ${order.event.title} has been processed.`,
+    `${isFullRefund ? 'Full refund' : `Refund of ${formatAmount(amount, order.currency)}`} for ${order.event.title} has been initiated. It may take 5-10 business days to appear in your account.`,
     { order_id: orderId, refund_id: refundRecord?.id },
   )
 
+  // 12. Send refund email
+  const { data: userAuth } = await service.auth.admin.getUserById(order.user_id)
+  if (userAuth?.user?.email) {
+    await sendRefundNotification(userAuth.user.email, {
+      customerName: (await service.from('profiles').select('full_name').eq('id', order.user_id).single<{ full_name: string | null }>()).data?.full_name ?? 'there',
+      eventTitle: order.event.title,
+      orderNumber: orderId.substring(0, 8).toUpperCase(),
+      refundAmount: formatAmount(amount, order.currency),
+      reason,
+    })
+  }
+
   console.log(
-    `[refunds] Refund created: order=${orderId} amount=${amount} status=${stripeRefund.status} stripe_id=${stripeRefund.id}`,
+    `[refunds] Refund created: order=${orderId} amount=${amountETB} ETB status=${chapaRefund.data.status} chapa_id=${chapaRefund.data.id}`,
   )
 
   return {
     success: true,
-    refundId: refundRecord?.id ?? stripeRefund.id,
+    refundId: refundRecord?.id ?? chapaRefund.data.id,
   }
 }
 
