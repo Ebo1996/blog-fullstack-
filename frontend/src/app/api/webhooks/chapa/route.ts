@@ -260,6 +260,8 @@ export async function POST(req: NextRequest) {
 
   console.log(`[chapa-webhook] Payment confirmed for order ${order.id}, tx_ref: ${txRef}`)
   return NextResponse.json({ received: true })
+    },
+  )
 }
 
 // ─── Also handle GET — Chapa sometimes sends a GET to verify the endpoint ────

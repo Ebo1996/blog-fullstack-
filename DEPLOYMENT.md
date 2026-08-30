@@ -8,7 +8,7 @@ Complete guide for deploying Northstar to production.
 
 - [Environment Setup](#environment-setup)
 - [Database Migration](#database-migration)
-- [Stripe Configuration](#stripe-configuration)
+- [Chapa Configuration](#chapa-configuration)
 - [Storage Configuration](#storage-configuration)
 - [Deployment Platforms](#deployment-platforms)
 - [Post-Deployment Checklist](#post-deployment-checklist)
@@ -27,10 +27,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
-# Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxxxx
-STRIPE_SECRET_KEY=sk_live_xxxxx
-STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+# Chapa (Ethiopian Payment Gateway)
+CHAPA_SECRET_KEY=CHASECK_TEST-your_test_key  # Use CHASECK- for live
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=https://yourdomain.com
@@ -49,15 +47,15 @@ NODE_ENV=production
    - anon/public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - service_role key → `SUPABASE_SERVICE_ROLE_KEY` (⚠️ Keep secret!)
 
-#### Stripe
+#### Chapa
 
-1. Go to [stripe.com/dashboard](https://dashboard.stripe.com)
-2. Toggle to Live mode (top right)
-3. Navigate to Developers > API keys
-4. Copy:
-   - Publishable key → `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-   - Secret key → `STRIPE_SECRET_KEY` (⚠️ Keep secret!)
-5. For webhook secret, see [Stripe Configuration](#stripe-configuration)
+1. Go to [dashboard.chapa.co](https://dashboard.chapa.co)
+2. Sign in or create account
+3. Navigate to Settings > API Keys
+4. Copy your secret key → `CHAPA_SECRET_KEY`
+   - Test mode: `CHASECK_TEST-...`
+   - Live mode: `CHASECK-...`
+5. For webhook configuration, see [Chapa Configuration](#chapa-configuration)
 
 ---
 
@@ -126,30 +124,30 @@ supabase db reset --version 20240315000000
 
 ---
 
-## Stripe Configuration
+## Chapa Configuration
 
 ### Webhook Setup
 
-1. **Create webhook endpoint**
-   - Go to Stripe Dashboard > Developers > Webhooks
-   - Click "Add endpoint"
-   - Enter URL: `https://yourdomain.com/api/webhooks/stripe`
-   - Select events:
-     - `checkout.session.completed`
-     - `payment_intent.payment_failed`
+1. **Get your public URL**
+   - Your deployed app URL (e.g., `https://yourdomain.com`)
+   - Webhook endpoint: `https://yourdomain.com/api/webhooks/chapa`
 
-2. **Get webhook secret**
-   - After creating endpoint, click "Reveal" under "Signing secret"
-   - Copy to `STRIPE_WEBHOOK_SECRET`
+2. **Configure in Chapa Dashboard**
+   - Go to Chapa Dashboard > Settings > Webhooks
+   - Add webhook URL: `https://yourdomain.com/api/webhooks/chapa`
+   - Save configuration
 
 3. **Test webhook (local development)**
    ```bash
-   stripe listen --forward-to localhost:3000/api/webhooks/stripe
+   # Use ngrok to expose localhost
+   ngrok http 3000
+   # Copy the https URL and set it in Chapa dashboard
+   # Example: https://abc123.ngrok.io/api/webhooks/chapa
    ```
 
 ### Payment Settings
 
-Configure in Stripe Dashboard:
+Configure in Chapa Dashboard:
 
 1. **Business settings**
    - Company name
@@ -235,9 +233,7 @@ Configure in Supabase Dashboard > Storage > Settings:
    vercel env add NEXT_PUBLIC_SUPABASE_URL production
    vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
    vercel env add SUPABASE_SERVICE_ROLE_KEY production
-   vercel env add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY production
-   vercel env add STRIPE_SECRET_KEY production
-   vercel env add STRIPE_WEBHOOK_SECRET production
+   vercel env add CHAPA_SECRET_KEY production
    vercel env add NEXT_PUBLIC_APP_URL production
    ```
 
@@ -303,7 +299,7 @@ docker compose up -d
 - [ ] App loads at production URL
 - [ ] All environment variables set correctly
 - [ ] Database migrations applied
-- [ ] Stripe webhooks receiving events
+- [ ] Chapa webhooks receiving events
 - [ ] Image uploads work
 - [ ] Email verification works
 - [ ] Checkout flow completes
@@ -323,7 +319,7 @@ docker compose up -d
 - [ ] Error tracking configured (Sentry)
 - [ ] Uptime monitoring (Vercel, UptimeRobot)
 - [ ] Database performance monitoring
-- [ ] Stripe webhook delivery monitoring
+- [ ] Chapa webhook delivery monitoring
 - [ ] Log aggregation service connected
 
 ### Performance

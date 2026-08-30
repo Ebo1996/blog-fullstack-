@@ -54,16 +54,16 @@ export default async function OrganizerSettingsPage() {
           </div>
           <div className="setting-row" style={{ paddingBottom: 0 }}>
             <div>
-              <strong>Stripe payments</strong>
-              <span>Payments are processed via Stripe. Configure in your Stripe dashboard.</span>
+              <strong>Chapa payments</strong>
+              <span>Payments are processed via Chapa (Ethiopian payment gateway). View transactions in your Chapa dashboard.</span>
             </div>
             <a
-              href="https://dashboard.stripe.com"
+              href="https://dashboard.chapa.co"
               target="_blank"
               rel="noopener noreferrer"
               className="button button-outline button-sm"
             >
-              Stripe dashboard
+              Chapa dashboard
             </a>
           </div>
         </div>

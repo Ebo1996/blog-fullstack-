@@ -10,16 +10,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { uploadEventImageServer } from '@/lib/storage'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
 export async function POST(req: NextRequest) {
-  try {
-    // Authenticate
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonymous'
+  
+  return withRateLimit(
+    `upload:${ip}`,
+    RATE_LIMITS.API_DEFAULT,
+    async () => {
+      try {
+        // Authenticate
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+        if (!user) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
 
     // Check user is organizer or admin
     const { data: profile } = await supabase
@@ -81,4 +88,6 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     )
   }
+    },
+  )
 }

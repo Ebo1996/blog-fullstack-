@@ -327,7 +327,7 @@ function SuccessPending({
           Confirming your payment…
         </h1>
         <p style={{ color: 'var(--muted-foreground)', fontSize: 14, lineHeight: 1.65, margin: '0 0 24px' }}>
-          We&apos;re waiting for payment confirmation from Stripe.
+          We&apos;re waiting for payment confirmation from Chapa.
           This usually takes a few seconds.
         </p>
 
@@ -483,7 +483,7 @@ function SuccessTimeout({ orderId }: { orderId: string }) {
           Taking longer than usual
         </h1>
         <p style={{ color: 'var(--muted-foreground)', fontSize: 14, lineHeight: 1.65, margin: '0 0 24px' }}>
-          Your payment went through with Stripe but we&apos;re still confirming your tickets.
+          Your payment went through with Chapa but we&apos;re still confirming your tickets.
           Check your dashboard in a few minutes — your tickets will appear there once confirmed.
         </p>
 

@@ -125,9 +125,9 @@ export default async function AdminSettingsPage() {
             },
             {
               icon: <ShoppingBag size={14} />,
-              label: 'Stripe',
+              label: 'Chapa',
               desc:  'Payments, webhooks, and refunds',
-              href:  'https://dashboard.stripe.com',
+              href:  'https://dashboard.chapa.co',
               cta:   'Open dashboard',
             },
           ].map((item) => (
@@ -178,7 +178,7 @@ export default async function AdminSettingsPage() {
               <Shield size={14} style={{ color: 'var(--admin-accent)' }} aria-hidden="true" />
               <div>
                 <strong>Webhook signature verification</strong>
-                <span>All Stripe webhooks are cryptographically verified</span>
+                <span>All Chapa webhooks are verified via payment verification API</span>
               </div>
             </div>
             <span className="badge badge-success">Active</span>

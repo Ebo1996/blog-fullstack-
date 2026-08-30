@@ -31,7 +31,7 @@ Creates tickets and order atomically with inventory locking.
   p_event_id: string          // UUID of event
   p_ticket_type_id: string    // UUID of ticket type
   p_quantity: number          // Number of tickets (1-10)
-  p_stripe_payment_intent: string  // Stripe payment intent ID
+  p_payment_reference: string  // Chapa payment reference ID
 }
 ```
 
@@ -57,7 +57,7 @@ const { data } = await supabase.rpc('purchase_tickets', {
   p_event_id: eventId,
   p_ticket_type_id: ticketTypeId,
   p_quantity: 2,
-  p_stripe_payment_intent: 'pi_abc123',
+  p_payment_reference: 'chapa_ref_abc123',
 })
 ```
 
@@ -467,7 +467,7 @@ notifyEventCancelled(userId: string, eventId: string, eventTitle: string): Promi
 
 #### `createRefund`
 
-Processes a refund via Stripe and updates order.
+Processes a refund via Chapa and updates order.
 
 **Signature:**
 ```typescript
@@ -482,7 +482,7 @@ async function createRefund(
 **Process:**
 1. Validate organizer owns event
 2. Validate order is paid and refundable
-3. Create Stripe refund via `stripe.refunds.create()`
+3. Create Chapa refund via Chapa API
 4. Update order status (refunded/partially_refunded)
 5. Cancel tickets if full refund
 6. Create refund audit record
@@ -660,15 +660,14 @@ async function checkEventAvailability(
 
 ## Webhook Endpoints
 
-### Stripe Webhooks
+### Chapa Webhooks
 
-#### `POST /api/webhooks/stripe`
+#### `POST /api/webhooks/chapa`
 
-Handles Stripe webhook events.
+Handles Chapa webhook events.
 
 **Headers:**
 ```
-stripe-signature: <webhook signature>
 Content-Type: application/json
 ```
 
@@ -708,17 +707,18 @@ Triggered when payment fails.
 ---
 
 **Security:**
-- Signature verification required (via `stripe.webhooks.constructEvent`)
-- Raw body needed for signature validation
+- Verified via Chapa payment verification API
 - Service role key used for database operations
 
 **Error Responses:**
 - `400` - Webhook signature verification failed
 - `500` - Internal server error (logged)
 
-**Example Webhook Setup:**
+**Example Webhook Test:**
 ```bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+# Test locally with ngrok
+ngrok http 3000
+# Then set webhook URL in Chapa dashboard to: https://your-ngrok-url.ngrok.io/api/webhooks/chapa
 ```
 
 ---
@@ -796,8 +796,8 @@ All service functions return:
 - `"Cannot modify"` - Resource locked or immutable
 
 **External Service Errors:**
-- `"Payment failed"` - Stripe payment error
-- `"Webhook verification failed"` - Invalid Stripe signature
+- `"Payment failed"` - Chapa payment error
+- `"Webhook verification failed"` - Invalid Chapa tx_ref
 - `"Email delivery failed"` - Notification service error
 
 ### Error Logging
@@ -848,7 +848,7 @@ For API questions or issues:
 1. Check error logs: `console.error` output
 2. Review RLS policies: `backend/supabase/migrations/011_rls.sql`
 3. Test with seed data: `backend/supabase/seed.sql`
-4. Verify webhook signatures in Stripe Dashboard
+4. Verify webhook delivery in Chapa Dashboard
 
 ---
 

@@ -2,7 +2,7 @@
  * Payment / order service
  * Server-side only — used by pages and API routes.
  * The actual atomic ticket creation is done by the purchase_tickets() PostgreSQL
- * RPC called from the Stripe webhook handler. This service provides status
+ * RPC called from the Chapa webhook handler. This service provides status
  * polling and order lookup helpers used by the success/cancel pages.
  */
 
@@ -55,7 +55,7 @@ export async function getOrderStatus(
 }
 
 // ─── Cancel a pending order (used by cancel page) ─────────────────────────────
-// Only cancels if the order is still pending — paid orders are managed by Stripe.
+// Only cancels if the order is still pending — paid orders cannot be cancelled.
 
 export async function cancelPendingOrder(
   orderId: string,
