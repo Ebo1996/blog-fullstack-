@@ -95,7 +95,7 @@ export function TicketPurchasePanel({
         body:    JSON.stringify({ eventId, items }),
       })
 
-      const data = await res.json() as { url?: string; error?: string }
+      const data = await res.json() as { url?: string; error?: string; provider?: string }
 
       if (res.status === 503) {
         setStripeNotConfigured(true)
@@ -106,7 +106,7 @@ export function TicketPurchasePanel({
         setError(data.error ?? 'Checkout failed. Please try again.')
         return
       }
-      // Redirect to Stripe Checkout — no return value used
+      // Redirect to Chapa hosted checkout page
       window.location.href = data.url
     } catch {
       setError('Network error. Please check your connection and try again.')
@@ -203,8 +203,7 @@ export function TicketPurchasePanel({
         <div style={{
           display: 'grid', placeItems: 'center',
           width: 52, height: 52, borderRadius: 'var(--radius-lg)',
-          background: 'rgba(216,174,98,0.1)',
-          color: 'var(--warning)',
+          background: 'rgba(216,174,98,0.1)', color: 'var(--warning)',
           margin: '0 auto 16px',
         }}>
           <Lock size={24} aria-hidden="true" />
@@ -213,10 +212,11 @@ export function TicketPurchasePanel({
           Payments not configured
         </p>
         <p style={{ fontSize: 13, color: 'var(--muted-foreground)', margin: '0 0 8px', lineHeight: 1.6 }}>
-          This is a demo. To enable checkout, add your Stripe keys to{' '}
+          Add your Chapa secret key to{' '}
           <code style={{ fontFamily: 'monospace', background: 'var(--muted)', padding: '1px 5px', borderRadius: 4 }}>
             .env.local
-          </code>:
+          </code>{' '}
+          to enable checkout:
         </p>
         <div style={{
           background: 'var(--muted)', border: '1px solid var(--border)',
@@ -224,17 +224,16 @@ export function TicketPurchasePanel({
           textAlign: 'left', fontSize: 11, fontFamily: 'monospace',
           color: 'var(--muted-foreground)', lineHeight: 1.7, marginTop: 12,
         }}>
-          <div style={{ color: 'var(--success)' }}>STRIPE_SECRET_KEY=sk_test_...</div>
-          <div>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...</div>
+          <div style={{ color: 'var(--success)' }}>CHAPA_SECRET_KEY=CHASECK_TEST-...</div>
         </div>
         <a
-          href="https://dashboard.stripe.com/apikeys"
+          href="https://dashboard.chapa.co/register"
           target="_blank"
           rel="noopener noreferrer"
           className="button button-outline"
           style={{ marginTop: 16, fontSize: 12, display: 'inline-flex', gap: 6 }}
         >
-          Get Stripe keys →
+          Get Chapa keys — it&apos;s free →
         </a>
       </div>
     )
@@ -439,11 +438,11 @@ export function TicketPurchasePanel({
         </button>
       )}
 
-      {/* Stripe trust badge */}
+      {/* Chapa trust badge */}
       {!activeTypes.every((t) => t.price === 0) && (
         <p style={{ fontSize: 11, color: 'var(--muted-foreground)', textAlign: 'center', marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
           <Lock size={10} aria-hidden="true" />
-          Secure checkout via Stripe
+          Secure checkout via Chapa · Telebirr &amp; bank supported
         </p>
       )}
     </div>

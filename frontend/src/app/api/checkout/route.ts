@@ -3,12 +3,13 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
-  stripe,
-  stripeEnabled,
-  buildLineItems,
+  chapaEnabled,
+  initializePayment,
   calculateFee,
   calculateTotal,
-} from '@/lib/stripe'
+  centsToETB,
+  buildTxRef,
+} from '@/lib/chapa'
 
 // ─── Request schema ───────────────────────────────────────────────────────────
 const checkoutSchema = z.object({
@@ -24,12 +25,12 @@ const checkoutSchema = z.object({
     .max(10),
 })
 
-// ─── Helper types ──────────────────────────────────────────────────────────────
+// ─── Helper types ─────────────────────────────────────────────────────────────
 interface TicketTypeRow {
   id: string
   name: string
   description: string | null
-  price: number
+  price: number       // stored in agelot (cents), e.g. 15000 = 150 ETB
   currency: string
   quantity: number
   sold_quantity: number
@@ -47,13 +48,18 @@ interface EventRow {
 
 export async function POST(request: Request) {
   try {
-    // ── 0. Guard: Stripe not configured ──────────────────────────────────
-    if (!stripeEnabled || !stripe) {
+    // ── 0. Guard: Chapa not configured ────────────────────────────────────
+    if (!chapaEnabled) {
       return NextResponse.json(
-        { error: 'Payments are not configured yet. Add your Stripe keys to .env.local to enable checkout.' },
+        {
+          error:    'Payments are not configured yet.',
+          provider: 'chapa',
+          hint:     'Add CHAPA_SECRET_KEY to .env.local. Get your key at dashboard.chapa.co',
+        },
         { status: 503 },
       )
     }
+
     // ── 1. Parse + validate body ──────────────────────────────────────────
     const body = await request.json() as unknown
     const parsed = checkoutSchema.safeParse(body)
@@ -69,10 +75,24 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      return NextResponse.json({ error: 'You must be signed in to purchase tickets.' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'You must be signed in to purchase tickets.' },
+        { status: 401 },
+      )
     }
 
-    // ── 3. Validate event is published ────────────────────────────────────
+    // ── 3. Get user profile (need name for Chapa) ─────────────────────────
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single<{ full_name: string | null }>()
+
+    const nameParts  = (profile?.full_name ?? 'Northstar User').split(' ')
+    const firstName  = nameParts[0] ?? 'Northstar'
+    const lastName   = nameParts.slice(1).join(' ') || 'User'
+
+    // ── 4. Validate event is published ────────────────────────────────────
     const { data: event, error: eventErr } = await supabase
       .from('events')
       .select('id, title, slug, status')
@@ -81,10 +101,13 @@ export async function POST(request: Request) {
       .single<EventRow>()
 
     if (eventErr || !event) {
-      return NextResponse.json({ error: 'Event not found or not available.' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Event not found or not available.' },
+        { status: 404 },
+      )
     }
 
-    // ── 4. Validate ticket types + inventory (server-side, not trusting client) ─
+    // ── 5. Validate ticket types + inventory ──────────────────────────────
     const ticketTypeIds = items.map((i) => i.ticketTypeId)
 
     const { data: ticketTypes, error: ttErr } = await supabase
@@ -94,17 +117,18 @@ export async function POST(request: Request) {
       .eq('event_id', eventId) as { data: TicketTypeRow[] | null; error: unknown }
 
     if (ttErr || !ticketTypes || ticketTypes.length !== ticketTypeIds.length) {
-      return NextResponse.json({ error: 'One or more ticket types are invalid.' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'One or more ticket types are invalid.' },
+        { status: 400 },
+      )
     }
 
     const now = new Date()
     const lineItems: Array<{
       ticketTypeId: string
       name: string
-      description: string | null
-      unitPrice: number
+      unitPriceCents: number
       quantity: number
-      currency: string
     }> = []
 
     for (const item of items) {
@@ -125,22 +149,24 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `Sales for "${tt.name}" have ended.` }, { status: 400 })
       }
       lineItems.push({
-        ticketTypeId: tt.id,
-        name: tt.name,
-        description: tt.description,
-        unitPrice: tt.price,
-        quantity: item.quantity,
-        currency: tt.currency,
+        ticketTypeId:   tt.id,
+        name:           tt.name,
+        unitPriceCents: tt.price,
+        quantity:       item.quantity,
       })
     }
 
-    // ── 5. Calculate amounts ──────────────────────────────────────────────
-    const subtotal = lineItems.reduce((s, i) => s + i.unitPrice * i.quantity, 0)
-    const fees = calculateFee(subtotal)
-    const total = calculateTotal(subtotal)
-    const currency = lineItems[0]?.currency ?? 'USD'
+    // ── 6. Calculate amounts (in ETB) ─────────────────────────────────────
+    const subtotalCents = lineItems.reduce((s, i) => s + i.unitPriceCents * i.quantity, 0)
+    const subtotalETB   = centsToETB(subtotalCents)
+    const feesETB       = calculateFee(subtotalETB)
+    const totalETB      = calculateTotal(subtotalETB)
 
-    // ── 6. Create a pending order via service client (bypasses RLS insert check) ─
+    // Keep DB values in cents for consistency
+    const feesCents  = Math.round(feesETB  * 100)
+    const totalCents = Math.round(totalETB * 100)
+
+    // ── 7. Create pending order in DB ─────────────────────────────────────
     const service = createServiceClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const insertResult = await (service as any)
@@ -149,71 +175,69 @@ export async function POST(request: Request) {
         user_id:      user.id,
         event_id:     eventId,
         status:       'pending',
-        subtotal,
-        fees,
-        total_amount: total,
-        currency:     currency.toUpperCase(),
+        subtotal:     subtotalCents,
+        fees:         feesCents,
+        total_amount: totalCents,
+        currency:     'ETB',
       })
       .select('id')
       .single() as { data: { id: string } | null; error: { message: string } | null }
 
-    const order    = insertResult.data
-    const orderErr = insertResult.error
-
-    if (orderErr || !order) {
-      console.error('[checkout] order insert error:', orderErr)
-      return NextResponse.json({ error: 'Could not create order. Please try again.' }, { status: 500 })
+    if (insertResult.error || !insertResult.data) {
+      console.error('[checkout] order insert error:', insertResult.error)
+      return NextResponse.json(
+        { error: 'Could not create order. Please try again.' },
+        { status: 500 },
+      )
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const orderId = insertResult.data.id
+    const txRef   = buildTxRef(orderId)
 
-    // ── 7. Create Stripe Checkout Session ────────────────────────────────
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      line_items: buildLineItems(lineItems),
-      // Platform fee as a separate line item so it's transparent
-      ...(fees > 0 && {
-        line_items: [
-          ...buildLineItems(lineItems),
-          {
-            price_data: {
-              currency: currency.toLowerCase(),
-              unit_amount: fees,
-              product_data: { name: 'Platform fee' },
-            },
-            quantity: 1,
-          },
-        ],
-      }),
-      metadata: {
-        order_id:  order.id,
-        event_id:  eventId,
-        user_id:   user.id,
-        // Serialise items for webhook use — compact format
-        items: JSON.stringify(
-          lineItems.map((li) => ({
-            t: li.ticketTypeId,
-            q: li.quantity,
-            p: li.unitPrice,
-          })),
-        ),
-      },
-      client_reference_id: order.id,
-      customer_email:      user.email ?? undefined,
-      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
-      cancel_url:  `${appUrl}/checkout/cancel?order_id=${order.id}&event_slug=${event.slug}`,
-      expires_at:  Math.floor(Date.now() / 1000) + 30 * 60, // 30 min
-    })
-
-    // ── 8. Store the Stripe session ID on the order ───────────────────────
+    // Store the tx_ref on the order so the webhook can look it up
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (service as any)
       .from('orders')
-      .update({ stripe_checkout_session_id: session.id })
-      .eq('id', order.id)
+      .update({ stripe_checkout_session_id: txRef }) // reusing the column to store tx_ref
+      .eq('id', orderId)
 
-    return NextResponse.json({ url: session.url, sessionId: session.id, orderId: order.id })
+    // ── 8. Initialize Chapa payment ───────────────────────────────────────
+    const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const callbackUrl = `${appUrl}/api/webhooks/chapa`
+    const returnUrl   = `${appUrl}/checkout/success?tx_ref=${txRef}&order_id=${orderId}`
+
+    const chapaResponse = await initializePayment({
+      amount:      totalETB,
+      currency:    'ETB',
+      email:       user.email ?? `user-${user.id}@northstar.app`,
+      first_name:  firstName,
+      last_name:   lastName,
+      tx_ref:      txRef,
+      callback_url: callbackUrl,
+      return_url:  returnUrl,
+      customization: {
+        title:       `Tickets — ${event.title}`,
+        description: lineItems.map((i) => `${i.quantity}× ${i.name}`).join(', '),
+      },
+    })
+
+    if (chapaResponse.status !== 'success' || !chapaResponse.data?.checkout_url) {
+      console.error('[checkout] Chapa initialize failed:', chapaResponse)
+      // Cleanup the pending order
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (service as any).from('orders').update({ status: 'cancelled' }).eq('id', orderId)
+      return NextResponse.json(
+        { error: 'Could not start payment. Please try again.' },
+        { status: 502 },
+      )
+    }
+
+    return NextResponse.json({
+      url:      chapaResponse.data.checkout_url,
+      txRef,
+      orderId,
+    })
+
   } catch (err) {
     console.error('[checkout] unexpected error:', err)
     return NextResponse.json(

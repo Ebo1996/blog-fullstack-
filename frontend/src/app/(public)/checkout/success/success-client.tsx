@@ -3,14 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import {
-  CheckCircle,
-  Clock,
-  Ticket,
-  CalendarDays,
-  MapPin,
-  ArrowUpRight,
-  XCircle,
-  QrCode,
+  CheckCircle, Clock, Ticket, CalendarDays,
+  MapPin, ArrowUpRight, XCircle, QrCode,
 } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils/format'
 import type { OrderTicketSummary } from '@/services/payments'
@@ -26,6 +20,7 @@ interface EventSummary {
 
 interface SuccessClientProps {
   orderId: string
+  txRef: string              // Chapa tx_ref (replaces Stripe session_id)
   initialStatus: string
   totalAmount: number
   currency: string
@@ -33,33 +28,36 @@ interface SuccessClientProps {
   initialTickets: OrderTicketSummary[]
 }
 
-const POLL_INTERVAL_MS = 2000   // poll every 2 s
-const POLL_MAX_ATTEMPTS = 30    // give up after 60 s (webhook may be delayed)
+const POLL_INTERVAL_MS  = 2000   // poll every 2 s
+const POLL_MAX_ATTEMPTS = 30     // give up after ~60 s
 
 export function SuccessClient({
   orderId,
+  txRef,
   initialStatus,
   totalAmount,
   currency,
   event,
   initialTickets,
 }: SuccessClientProps) {
-  const [status, setStatus] = useState(initialStatus)
+  const [status,  setStatus]  = useState(initialStatus)
   const [tickets, setTickets] = useState<OrderTicketSummary[]>(initialTickets)
   const [attempts, setAttempts] = useState(0)
-  const [polling, setPolling] = useState(initialStatus === 'pending')
+  const [polling,  setPolling]  = useState(initialStatus === 'pending')
 
-  // ── Poll /api/orders/[orderId]/status until paid or failed ───────────────
+  // ── Poll /api/checkout/verify?tx_ref=...&order_id=... ────────────────────
   const poll = useCallback(async () => {
     try {
-      const res  = await fetch(`/api/orders/${orderId}/status`, { cache: 'no-store' })
+      const res  = await fetch(
+        `/api/checkout/verify?tx_ref=${encodeURIComponent(txRef)}&order_id=${orderId}`,
+        { cache: 'no-store' },
+      )
       const data = await res.json() as { status?: string }
       const newStatus = data.status ?? 'pending'
       setStatus(newStatus)
 
       if (newStatus === 'paid') {
         setPolling(false)
-        // Fetch tickets now that they exist
         const ticketRes = await fetch(`/api/orders/${orderId}/tickets`, { cache: 'no-store' })
         if (ticketRes.ok) {
           const ticketData = await ticketRes.json() as { tickets?: OrderTicketSummary[] }
@@ -166,7 +164,7 @@ function SuccessPaid({
             You&apos;re going!
           </h1>
           <p style={{ color: 'var(--muted-foreground)', fontSize: 14, margin: '0 0 20px' }}>
-            Payment confirmed · {formatCurrency(totalAmount, currency)}
+            Payment confirmed · {formatCurrency(totalAmount, currency || 'ETB')}
           </p>
 
           {/* Event info */}

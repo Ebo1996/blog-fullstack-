@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ArrowUpRight, Ticket, Shield, Zap, BarChart2, Users, Globe } from 'lucide-react'
+import { getPublicPlatformStats } from '@/services/platform-stats'
 
 export const metadata: Metadata = {
   title: 'About Northstar',
@@ -53,14 +54,15 @@ const values = [
   },
 ]
 
-const stats = [
-  { value: '10,000+', label: 'Tickets sold' },
-  { value: '500+', label: 'Events created' },
-  { value: '3 min', label: 'Average checkout time' },
-  { value: '99.9%', label: 'Check-in uptime' },
-]
+export default async function AboutPage() {
+  const platformStats = await getPublicPlatformStats()
 
-export default function AboutPage() {
+  const stats = [
+    { value: platformStats.ticketsSoldDisplay, label: 'Tickets sold'           },
+    { value: platformStats.eventsDisplay,      label: 'Events created'         },
+    { value: platformStats.organizersDisplay,  label: 'Organizers on Northstar'},
+    { value: '2 min',                          label: 'Average setup time'     },
+  ]
   return (
     <main>
       {/* ── HERO ─────────────────────────────────────────────────────── */}

@@ -15,21 +15,24 @@ function getString(v: string | string[] | undefined): string {
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: Props) {
-  const sp = await searchParams
-  const orderId   = getString(sp['order_id'])
-  const sessionId = getString(sp['session_id'])
+  const sp      = await searchParams
+  const orderId = getString(sp['order_id'])
+  const txRef   = getString(sp['tx_ref'])
 
-  // Both params required — redirect away if missing
-  if (!orderId || !sessionId) redirect('/events')
+  // Both params required
+  if (!orderId || !txRef) redirect('/events')
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Server-render initial data: current order status + tickets (if already paid)
+  // Fetch order — scoped to this user
   const { data: order } = await supabase
     .from('orders')
-    .select('id, status, total_amount, currency, event:events(id, title, slug, start_at, venue_name, city)')
+    .select(`
+      id, status, total_amount, currency,
+      event:events(id, title, slug, start_at, venue_name, city)
+    `)
     .eq('id', orderId)
     .eq('user_id', user.id)
     .single<{
@@ -37,13 +40,19 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
       status: string
       total_amount: number
       currency: string
-      event: { id: string; title: string; slug: string; start_at: string; venue_name: string | null; city: string | null }
+      event: {
+        id: string
+        title: string
+        slug: string
+        start_at: string
+        venue_name: string | null
+        city: string | null
+      }
     }>()
 
-  // Prevent accessing another user's order
   if (!order) redirect('/dashboard/orders')
 
-  // If already paid (webhook fired before page load) — fetch tickets immediately
+  // If already paid, fetch tickets immediately so the page renders fast
   const tickets = order.status === 'paid'
     ? await getTicketsForOrder(orderId, user.id)
     : []
@@ -51,6 +60,7 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
     <SuccessClient
       orderId={orderId}
+      txRef={txRef}
       initialStatus={order.status}
       totalAmount={order.total_amount}
       currency={order.currency}

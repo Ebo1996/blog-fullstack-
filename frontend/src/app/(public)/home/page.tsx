@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowUpRight, Calendar, Shield, Ticket, Zap, Users, BarChart2, Sparkles, ChevronRight } from 'lucide-react'
 import { getFeaturedEvents, getUpcomingEvents } from '@/services/events'
 import { getAllCategories } from '@/services/categories'
+import { getPublicPlatformStats } from '@/services/platform-stats'
 import { EventCard, EventCardFeatured } from '@/components/public/event-card'
 import { HomeSearch } from '@/components/public/home-search'
 import type { Metadata } from 'next'
@@ -71,19 +72,20 @@ const whyItems = [
   },
 ]
 
-const stats = [
-  { value: '50K+', label: 'Tickets sold' },
-  { value: '1,200+', label: 'Events hosted' },
-  { value: '98%', label: 'Satisfaction rate' },
-  { value: '2 min', label: 'Avg. setup time' },
-]
-
 export default async function HomePage() {
-  const [featured, upcoming, categories] = await Promise.all([
+  const [featured, upcoming, categories, platformStats] = await Promise.all([
     getFeaturedEvents(4),
     getUpcomingEvents(8),
     getAllCategories(),
+    getPublicPlatformStats(),
   ])
+
+  const stats = [
+    { value: platformStats.ticketsSoldDisplay, label: 'Tickets sold'    },
+    { value: platformStats.eventsDisplay,      label: 'Events hosted'   },
+    { value: platformStats.organizersDisplay,  label: 'Organizers'      },
+    { value: '2 min',                          label: 'Avg. setup time' },
+  ]
 
   const heroEvent = featured[0]
   const featuredRest = featured.slice(1, 4)
@@ -214,7 +216,9 @@ export default async function HomePage() {
 
           {/* Trust line */}
           <p style={{ marginTop: 32, fontSize: 12, color: 'var(--muted-foreground)', opacity: 0.7 }}>
-            Trusted by 1,200+ organizers · No credit card required
+            {platformStats.organizersDisplay !== '—' && platformStats.totalOrganizers > 0
+              ? `Trusted by ${platformStats.organizersDisplay} organizers · No credit card required`
+              : 'Trusted by organizers worldwide · No credit card required'}
           </p>
         </div>
       </section>
