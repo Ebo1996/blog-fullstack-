@@ -94,9 +94,7 @@ export async function registerAction(
   })
 
   if (error) {
-    if (error.message.includes('already registered')) {
-      return { error: 'An account with this email already exists.' }
-    }
+    // Deliberately vague — don't confirm whether the email is already registered
     return { error: 'Registration failed. Please try again.' }
   }
 

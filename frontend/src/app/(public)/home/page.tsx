@@ -38,7 +38,7 @@ const whyItems = [
   {
     icon: <Shield size={18} aria-hidden="true" />,
     title: 'Secure payments',
-    body: 'Stripe-powered checkout with fraud protection. Your payment data never touches our servers.',
+    body: 'Chapa-powered checkout with ETB support. Pay with Telebirr, bank transfer, or card.',
     accent: '#34d399',
     accentBg: 'rgba(52,211,153,0.08)',
   },
@@ -560,7 +560,7 @@ export default async function HomePage() {
               Sell tickets to your event<br />in minutes.
             </h2>
             <p style={{ color: '#8aaa68', fontSize: 15, lineHeight: 1.7, margin: '0 0 32px', maxWidth: 460 }}>
-              Create your event, set up ticket types, publish, and start selling. Stripe payments, QR check-in, and real-time analytics included.
+              Create your event, set up ticket types, publish, and start selling. Chapa payments (ETB), QR check-in, and real-time analytics included.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <Link

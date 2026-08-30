@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { z } from 'zod'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
 const schema = z.object({
   ticketId: z.string().uuid(),
@@ -9,6 +10,12 @@ const schema = z.object({
 })
 
 export async function POST(request: Request) {
+  const ip = (request as unknown as { headers: Headers }).headers?.get('x-forwarded-for') ?? 'anonymous'
+
+  return withRateLimit(
+    `transfer:${ip}`,
+    RATE_LIMITS.TRANSFERS,
+    async () => {
   try {
     const body = await request.json() as unknown
     const parsed = schema.safeParse(body)
@@ -124,4 +131,6 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
+    },
+  )
 }

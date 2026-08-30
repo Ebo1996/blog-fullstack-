@@ -4,14 +4,10 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Loader2, Tag, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils/format'
 import { validatePromoCode } from '@/services/promo-codes'
-import { loadStripe } from '@stripe/stripe-js'
 import Image from 'next/image'
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 interface CheckoutFormProps {
   event: {
@@ -97,7 +93,7 @@ export function CheckoutForm({ event, ticketType, quantity, userId, waitlistId, 
       })
 
       if (result.success && result.url) {
-        // Redirect to Stripe Checkout
+        // Redirect to Chapa Checkout
         window.location.href = result.url
       } else {
         alert(result.error || 'Failed to create checkout session')
@@ -254,8 +250,8 @@ export function CheckoutForm({ event, ticketType, quantity, userId, waitlistId, 
             </Button>
 
             <div className="text-xs text-muted-foreground text-center space-y-1">
-              <p>Secure payment powered by Stripe</p>
-              <p>You will not be charged until you complete the checkout process</p>
+              <p>Secure payment powered by Chapa</p>
+              <p>Pay with Telebirr, bank transfer, or card</p>
             </div>
           </CardContent>
         </Card>

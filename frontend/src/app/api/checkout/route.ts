@@ -57,10 +57,6 @@ export async function POST(request: NextRequest) {
     async () => {
       try {
         // ── 0. Guard: Chapa not configured ────────────────────────────────────
-        console.log('[checkout] chapaEnabled:', chapaEnabled)
-        console.log('[checkout] CHAPA_SECRET_KEY exists:', !!process.env.CHAPA_SECRET_KEY)
-        console.log('[checkout] CHAPA_SECRET_KEY prefix:', process.env.CHAPA_SECRET_KEY?.substring(0, 15))
-        
         if (!chapaEnabled) {
           return NextResponse.json(
             {

@@ -37,7 +37,7 @@ export function TicketPurchasePanel({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [rsvpDone, setRsvpDone] = useState<'confirmed' | 'waitlisted' | null>(null)
-  const [stripeNotConfigured, setStripeNotConfigured] = useState(false)
+  const [chapaNotConfigured, setPaymentNotConfigured] = useState(false)
 
   const activeTypes = ticketTypes.filter((t) => t.status !== 'inactive')
 
@@ -100,7 +100,7 @@ export function TicketPurchasePanel({
       console.log('[checkout] Response:', { status: res.status, data })
 
       if (res.status === 503) {
-        setStripeNotConfigured(true)
+        setPaymentNotConfigured(true)
         return
       }
 
@@ -200,8 +200,8 @@ export function TicketPurchasePanel({
     )
   }
 
-  // ─── Stripe not configured (demo mode) ───────────────────────────────────
-  if (stripeNotConfigured) {
+  // ─── Chapa not configured (demo mode) ───────────────────────────────────
+  if (chapaNotConfigured) {
     return (
       <div className="panel" style={{ textAlign: 'center', padding: '32px 24px' }}>
         <div style={{

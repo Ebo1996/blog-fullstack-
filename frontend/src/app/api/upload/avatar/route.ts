@@ -10,11 +10,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024 // 2 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'anonymous'
+
+  return withRateLimit(
+    `upload-avatar:${ip}`,
+    RATE_LIMITS.API_DEFAULT,
+    async () => {
   try {
     // Authenticate
     const supabase = await createClient()
@@ -99,4 +106,6 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     )
   }
+    },
+  )
 }

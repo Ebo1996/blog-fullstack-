@@ -1,9 +1,9 @@
 /**
  * Payment / order service
  * Server-side only — used by pages and API routes.
- * The actual atomic ticket creation is done by the purchase_tickets() PostgreSQL
- * RPC called from the Stripe webhook handler. This service provides status
- * polling and order lookup helpers used by the success/cancel pages.
+ * The actual atomic ticket creation is done inside the Chapa webhook handler
+ * after payment verification. This service provides status polling and order
+ * lookup helpers used by the success/cancel pages.
  */
 
 import { createClient } from '@/lib/supabase/server'
@@ -55,7 +55,7 @@ export async function getOrderStatus(
 }
 
 // ─── Cancel a pending order (used by cancel page) ─────────────────────────────
-// Only cancels if the order is still pending — paid orders are managed by Stripe.
+// Only cancels if the order is still pending — paid orders are managed via Chapa.
 
 export async function cancelPendingOrder(
   orderId: string,

@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { verifyPayment } from '@/lib/chapa'
+import { verifyPayment, verifyChapaWebhookSignature } from '@/lib/chapa'
 import { sendOrderConfirmation, sendTicketDelivery } from '@/lib/email'
 import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
@@ -24,12 +24,28 @@ export async function POST(req: NextRequest) {
     `webhook:${ip}`,
     RATE_LIMITS.WEBHOOK,
     async () => {
-      let body: { tx_ref?: string; status?: string } = {}
-
+      // ── 0. Read raw body (needed for HMAC verification) ─────────────────
+      let rawBody: string
       try {
-        body = await req.json() as { tx_ref?: string; status?: string }
+        rawBody = await req.text()
       } catch {
         return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+      }
+
+      // ── 1. Verify Chapa HMAC signature ───────────────────────────────────
+      const signature = req.headers.get('x-chapa-signature')
+      const signatureValid = await verifyChapaWebhookSignature(rawBody, signature)
+      if (!signatureValid) {
+        console.warn('[chapa-webhook] Invalid or missing signature — rejected')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
+
+      // ── 2. Parse body ────────────────────────────────────────────────────
+      let body: { tx_ref?: string; status?: string } = {}
+      try {
+        body = JSON.parse(rawBody) as { tx_ref?: string; status?: string }
+      } catch {
+        return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
       }
 
       const txRef = body.tx_ref

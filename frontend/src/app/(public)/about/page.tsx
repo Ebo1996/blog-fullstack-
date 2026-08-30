@@ -283,7 +283,7 @@ export default async function AboutPage() {
               Run your event on Northstar.
             </h2>
             <p style={{ color: 'var(--muted-foreground)', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>
-              Create an event, set up ticket types, publish, and start selling in minutes. Stripe handles payments — you handle the event.
+              Create an event, set up ticket types, publish, and start selling in minutes. Chapa handles payments in ETB — you handle the event.
             </p>
             <Link
               href="/organizer"
@@ -299,7 +299,7 @@ export default async function AboutPage() {
               { icon: <Zap size={16} />, text: 'QR check-in scanning built in' },
               { icon: <BarChart2 size={16} />, text: 'Real-time revenue and sales analytics' },
               { icon: <Users size={16} />, text: 'Attendee management and export' },
-              { icon: <Shield size={16} />, text: 'Stripe payments — no extra integrations' },
+              { icon: <Shield size={16} />, text: 'Chapa payments (ETB) — Telebirr, bank transfer, cards' },
             ].map((item) => (
               <div
                 key={item.text}

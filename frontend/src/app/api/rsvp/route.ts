@@ -2,12 +2,19 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { rsvpToEvent } from '@/services/payments'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 
 const schema = z.object({
   eventId: z.string().uuid(),
 })
 
 export async function POST(request: Request) {
+  const ip = (request as unknown as { headers: Headers }).headers?.get('x-forwarded-for') ?? 'anonymous'
+
+  return withRateLimit(
+    `rsvp:${ip}`,
+    RATE_LIMITS.API_DEFAULT,
+    async () => {
   try {
     const body   = await request.json() as unknown
     const parsed = schema.safeParse(body)
@@ -46,4 +53,6 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
+    },
+  )
 }

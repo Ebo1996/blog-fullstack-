@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { withRateLimit, RATE_LIMITS } from '@/lib/monitoring/rate-limiter'
 import type { ScanResponse } from '@/types'
 
 const schema = z.object({
@@ -10,6 +11,12 @@ const schema = z.object({
 })
 
 export async function POST(request: Request) {
+  const ip = (request as unknown as { headers: Headers }).headers?.get('x-forwarded-for') ?? 'anonymous'
+
+  return withRateLimit(
+    `validate:${ip}`,
+    RATE_LIMITS.API_DEFAULT,
+    async () => {
   try {
     const body   = await request.json() as unknown
     const parsed = schema.safeParse(body)
@@ -57,7 +64,6 @@ export async function POST(request: Request) {
     }
 
     // Call the atomic validate_and_checkin RPC via service client
-    // (service client so it can write the check_in audit record)
     const service = createServiceClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (service as any).rpc('validate_and_checkin', {
@@ -82,4 +88,6 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
+    },
+  )
 }

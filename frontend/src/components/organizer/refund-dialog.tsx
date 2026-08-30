@@ -266,7 +266,7 @@ export function RefundDialog({
                 }}
               >
                 <p style={{ fontSize: 12, color: 'var(--error)', margin: 0, lineHeight: 1.6 }}>
-                  <strong>Warning:</strong> This will process a {isFullRefund ? 'full' : 'partial'} refund through Stripe.
+                  <strong>Warning:</strong> This will process a {isFullRefund ? 'full' : 'partial'} refund through Chapa.
                   {isFullRefund && ' All associated tickets will be cancelled.'}
                   {' '}This action cannot be undone.
                 </p>

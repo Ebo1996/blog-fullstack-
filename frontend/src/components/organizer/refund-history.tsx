@@ -88,7 +88,7 @@ export function RefundHistory({ refunds, currency }: RefundHistoryProps) {
 
                 {refund.stripe_refund_id && (
                   <p style={{ fontSize: 11, color: 'var(--muted-foreground)', margin: '6px 0 0', fontFamily: 'var(--font-mono)' }}>
-                    Stripe ID: {refund.stripe_refund_id}
+                    Chapa Ref: {refund.stripe_refund_id}
                   </p>
                 )}
               </div>

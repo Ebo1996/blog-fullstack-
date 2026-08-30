@@ -153,7 +153,44 @@ export function buildTxRef(orderId: string): string {
   return `ns-${orderId.slice(0, 8)}-${Date.now()}`
 }
 
-// ─── Refund API ───────────────────────────────────────────────────────────────
+// ─── Webhook signature verification ──────────────────────────────────────────
+// Chapa signs webhook payloads with HMAC-SHA256 using your secret key.
+// Header: x-chapa-signature (hex-encoded HMAC of raw request body)
+
+export async function verifyChapaWebhookSignature(
+  rawBody: string,
+  signature: string | null,
+): Promise<boolean> {
+  if (!signature) return false
+  if (!CHAPA_SECRET_KEY) return false
+
+  const encoder = new TextEncoder()
+  const keyData = encoder.encode(CHAPA_SECRET_KEY)
+  const bodyData = encoder.encode(rawBody)
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+
+  const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, bodyData)
+  const expectedHex = Array.from(new Uint8Array(signatureBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+
+  // Constant-time comparison to prevent timing attacks
+  if (expectedHex.length !== signature.length) return false
+  let mismatch = 0
+  for (let i = 0; i < expectedHex.length; i++) {
+    mismatch |= expectedHex.charCodeAt(i) ^ signature.charCodeAt(i)
+  }
+  return mismatch === 0
+}
+
+
 
 export interface ChapaRefundRequest {
   tx_ref: string

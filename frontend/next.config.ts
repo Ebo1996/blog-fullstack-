@@ -1,11 +1,7 @@
+import * as Sentry from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // Enable instrumentation for environment validation
-  experimental: {
-    instrumentationHook: true,
-  },
-
   // Image optimization
   images: {
     remotePatterns: [
@@ -22,10 +18,40 @@ const nextConfig: NextConfig = {
 
   // Security headers
   async headers() {
+    const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+      ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+      : '*.supabase.co'
+
+    const csp = [
+      "default-src 'self'",
+      // Scripts: self + Next.js inline scripts (nonce-less approach uses unsafe-inline for RSC)
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // Styles: self + inline (Tailwind CSS-in-JS / style attributes)
+      "style-src 'self' 'unsafe-inline'",
+      // Images: self + Supabase Storage CDN + data URIs
+      `img-src 'self' data: blob: https://${supabaseHost} https://*.supabase.co`,
+      // Fonts: self
+      "font-src 'self'",
+      // Connections: self + Supabase + Chapa API
+      `connect-src 'self' https://${supabaseHost} https://*.supabase.co https://api.chapa.co wss://${supabaseHost}`,
+      // Frames: Chapa hosted checkout page
+      "frame-src 'self' https://checkout.chapa.co",
+      // Form actions: self only
+      "form-action 'self'",
+      // Base URI: self only
+      "base-uri 'self'",
+      // Block mixed content
+      "upgrade-insecure-requests",
+    ].join('; ')
+
     return [
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: csp,
+          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
@@ -71,4 +97,23 @@ const nextConfig: NextConfig = {
   compress: true,
 }
 
-export default nextConfig
+export default Sentry.withSentryConfig(nextConfig, {
+  // Sentry organization and project (from your DSN)
+  org: 'o4511999580831744',
+  project: 'eventify-ethiopia',
+
+  // Suppresses Sentry CLI output during build
+  silent: !process.env.CI,
+
+  // Upload source maps to Sentry for readable stack traces
+  widenClientFileUpload: true,
+
+  // Automatically tree-shake Sentry logger statements (reduces bundle size)
+  disableLogger: true,
+
+  // Hides Sentry from client bundle size stats
+  hideSourceMaps: true,
+
+  // Auto-instrument Vercel cron jobs
+  automaticVercelMonitors: true,
+})
