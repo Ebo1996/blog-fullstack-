@@ -1,3 +1,0 @@
-minimumReleaseAgeExclude:
-  - '@next/*'
-  - next
