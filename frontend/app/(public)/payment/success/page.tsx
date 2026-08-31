@@ -1,26 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, Loader2, XCircle } from 'lucide-react'
 import { paymentsApi } from '@/lib/api/orders'
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const params = useSearchParams()
-  const router = useRouter()
   const txRef = params.get('tx_ref')
   const [status, setStatus] = useState<'loading' | 'success' | 'failed'>('loading')
   const [order, setOrder] = useState<any>(null)
 
   useEffect(() => {
     if (!txRef) { setStatus('failed'); return }
-
     paymentsApi.verify(txRef)
-      .then((res) => {
-        setOrder(res.data?.order)
-        setStatus('success')
-      })
+      .then((res) => { setOrder(res.data?.order); setStatus('success') })
       .catch(() => setStatus('failed'))
   }, [txRef])
 
@@ -68,5 +63,18 @@ export default function PaymentSuccessPage() {
         <Link href="/events" className="btn btn-outline">Browse more events</Link>
       </div>
     </div>
+  )
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)]" />
+        <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   )
 }

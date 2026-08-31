@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
@@ -34,19 +35,20 @@ import { StorageModule } from './storage/storage.module';
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
         dbName: configService.get<string>('MONGODB_DB_NAME', 'eventify'),
-        autoIndex: true,
+        // Disable autoIndex in production — run index creation separately
+        autoIndex: configService.get<string>('NODE_ENV') !== 'production',
       }),
       inject: [ConfigService],
     }),
 
-    // Rate limiting
+    // Rate limiting — applied globally via APP_GUARD below
     ThrottlerModule.forRoot([
-      { name: 'short', ttl: 1000, limit: 10 },
-      { name: 'medium', ttl: 10000, limit: 50 },
-      { name: 'long', ttl: 60000, limit: 200 },
+      { name: 'short',  ttl: 1000,  limit: 10  },
+      { name: 'medium', ttl: 10000, limit: 50  },
+      { name: 'long',   ttl: 60000, limit: 200 },
     ]),
 
-    // Scheduler (for event reminders etc.)
+    // Scheduler (event reminders, expiry jobs, etc.)
     ScheduleModule.forRoot(),
 
     // Feature modules
@@ -66,6 +68,13 @@ import { StorageModule } from './storage/storage.module';
     AdminModule,
     AuditLogsModule,
     StorageModule,
+  ],
+  providers: [
+    // Apply ThrottlerGuard to every endpoint globally
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

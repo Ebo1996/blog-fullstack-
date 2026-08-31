@@ -67,9 +67,33 @@ export default function QRScannerPage() {
       </header>
 
       <div className="page-content max-w-lg">
-        <Link href="/organizer/events" className="inline-flex items-center gap-2 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-8">
+        <Link href="/organizer/events" className="inline-flex items-center gap-2 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] mb-6">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to events
         </Link>
+
+        {/* Sub-nav tabs */}
+        <div className="flex gap-1 mb-8 border-b border-[var(--border)]">
+          {[
+            { label: 'Details',  href: `/organizer/events/${eventId}/edit`    },
+            { label: 'Tickets',  href: `/organizer/events/${eventId}/tickets` },
+            { label: 'Scanner',  href: `/organizer/events/${eventId}/scanner` },
+          ].map(({ label, href }) => {
+            const isScannerTab = label === 'Scanner'
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`px-4 py-2 text-xs font-semibold border-b-2 transition-colors -mb-px ${
+                  isScannerTab
+                    ? 'border-[var(--primary)] text-[var(--foreground)]'
+                    : 'border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                }`}
+              >
+                {label}
+              </Link>
+            )
+          })}
+        </div>
 
         {/* Scanner input area */}
         <div className="panel text-center py-10 mb-6">

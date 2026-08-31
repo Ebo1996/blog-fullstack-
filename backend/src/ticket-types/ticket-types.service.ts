@@ -85,6 +85,24 @@ export class TicketTypesService {
     return tt.save();
   }
 
+  async delete(id: string, userId: string, userRole: UserRole): Promise<void> {
+    const tt = await this.findById(id);
+    const event = await this.eventsService.findById(tt.eventId.toString());
+
+    if (event.organizerId.toString() !== userId && userRole !== UserRole.ADMIN) {
+      throw new ForbiddenException('You do not own this event');
+    }
+
+    if (tt.soldQuantity > 0) {
+      throw new BadRequestException(
+        'Cannot delete a ticket type that has already sold tickets. Pause it instead.',
+      );
+    }
+
+    await this.ticketTypeModel.findByIdAndDelete(id);
+    await this.syncEventPriceRange(tt.eventId.toString());
+  }
+
   async resumeSales(id: string, userId: string, userRole: UserRole): Promise<TicketTypeDocument> {
     const tt = await this.findById(id);
     const event = await this.eventsService.findById(tt.eventId.toString());

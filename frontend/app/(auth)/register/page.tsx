@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -20,10 +20,9 @@ const schema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum(['attendee', 'organizer']),
 })
-
 type FormData = z.infer<typeof schema>
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
   const params = useSearchParams()
   const { refresh } = useAuth()
@@ -31,12 +30,8 @@ export default function RegisterPage() {
 
   const defaultRole = (params.get('role') as 'attendee' | 'organizer') ?? 'attendee'
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { role: defaultRole } })
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } =
+    useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { role: defaultRole } })
 
   const role = watch('role')
 
@@ -62,7 +57,6 @@ export default function RegisterPage() {
       <p className="text-xs text-[var(--muted-foreground)] mb-7">Join thousands of event-goers in Ethiopia</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        {/* Role toggle */}
         <div className="input-group">
           <span className="input-label">I want to</span>
           <div className="grid grid-cols-2 gap-2 mt-1">
@@ -82,24 +76,11 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <Input
-          id="name"
-          label="Full name"
-          placeholder="Abebe Bekele"
-          autoComplete="name"
-          error={errors.name?.message}
-          {...register('name')}
-        />
+        <Input id="name" label="Full name" placeholder="Abebe Bekele" autoComplete="name"
+          error={errors.name?.message} {...register('name')} />
 
-        <Input
-          id="email"
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          autoComplete="email"
-          error={errors.email?.message}
-          {...register('email')}
-        />
+        <Input id="email" label="Email" type="email" placeholder="you@example.com" autoComplete="email"
+          error={errors.email?.message} {...register('email')} />
 
         <div className="input-group">
           <label htmlFor="password" className="input-label">Password</label>
@@ -124,9 +105,7 @@ export default function RegisterPage() {
           {errors.password && <p className="input-error">{errors.password.message}</p>}
         </div>
 
-        <Button type="submit" className="w-full" loading={isSubmitting}>
-          Create account
-        </Button>
+        <Button type="submit" className="w-full" loading={isSubmitting}>Create account</Button>
       </form>
 
       <p className="text-center text-xs text-[var(--muted-foreground)] mt-6">
@@ -134,5 +113,13 @@ export default function RegisterPage() {
         <Link href="/login" className="text-[var(--primary)] hover:underline">Sign in</Link>
       </p>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="card w-full max-w-sm p-8 h-64" />}>
+      <RegisterForm />
+    </Suspense>
   )
 }

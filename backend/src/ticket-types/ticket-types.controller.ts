@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Param,
+  Controller, Get, Post, Patch, Delete, Param,
   Body, UseGuards, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -73,6 +73,16 @@ export class TicketTypesController {
   async resume(@Param('id') id: string, @CurrentUser() user: any) {
     const data = await this.ticketTypesService.resumeSales(id, user.sub, user.role);
     return { success: true, data };
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: '[Organizer] Delete ticket type (only if no tickets sold)' })
+  async remove(@Param('id') id: string, @CurrentUser() user: any) {
+    await this.ticketTypesService.delete(id, user.sub, user.role);
   }
 }
 

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { Plus, Trash2, Loader2, ArrowLeft } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { Loader2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,8 +11,6 @@ import { toast } from 'sonner'
 import { eventsApi } from '@/lib/api/events'
 import { Input, Textarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { formatCurrency } from '@/lib/utils'
 
 const schema = z.object({
   title: z.string().min(3),
@@ -32,28 +30,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const ttSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  price: z.number().min(0),
-  quantity: z.number().min(1),
-  salesStartAt: z.string().optional(),
-  salesEndAt: z.string().optional(),
-  maxPerOrder: z.number().min(1).default(10),
-})
-
-type TTFormData = z.infer<typeof ttSchema>
-
 export default function EditEventPage() {
   const { id } = useParams<{ id: string }>()
-  const router = useRouter()
   const [event, setEvent] = useState<any>(null)
   const [ticketTypes, setTicketTypes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [showTTForm, setShowTTForm] = useState(false)
 
   const form = useForm<FormData>({ resolver: zodResolver(schema) })
-  const ttForm = useForm<TTFormData>({ resolver: zodResolver(ttSchema), defaultValues: { maxPerOrder: 10, price: 0, quantity: 100 } })
 
   const loadData = async () => {
     try {
@@ -87,17 +70,6 @@ export default function EditEventPage() {
     } catch (err: any) { toast.error(err?.message ?? 'Update failed') }
   }
 
-  const onAddTicketType = async (data: TTFormData) => {
-    try {
-      await eventsApi.createTicketType(id, data)
-      toast.success('Ticket type added')
-      ttForm.reset({ maxPerOrder: 10, price: 0, quantity: 100 })
-      setShowTTForm(false)
-      const ttRes = await eventsApi.getTicketTypes(id)
-      setTicketTypes(ttRes.data ?? [])
-    } catch (err: any) { toast.error(err?.message ?? 'Failed to add ticket type') }
-  }
-
   if (loading) return (
     <div className="page-content flex items-center justify-center min-h-[300px]">
       <Loader2 className="w-6 h-6 animate-spin text-[var(--muted-foreground)]" />
@@ -117,6 +89,30 @@ export default function EditEventPage() {
         <Link href="/organizer/events" className="inline-flex items-center gap-2 text-xs text-[var(--muted-foreground)] mb-6">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to events
         </Link>
+
+        {/* Sub-nav tabs */}
+        <div className="flex gap-1 mb-8 border-b border-[var(--border)]">
+          {[
+            { label: 'Details',  href: `/organizer/events/${id}/edit`    },
+            { label: 'Tickets',  href: `/organizer/events/${id}/tickets` },
+            { label: 'Scanner',  href: `/organizer/events/${id}/scanner` },
+          ].map(({ label, href }) => {
+            const active = typeof window !== 'undefined' && window.location.pathname === href
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`px-4 py-2 text-xs font-semibold border-b-2 transition-colors -mb-px ${
+                  active
+                    ? 'border-[var(--primary)] text-[var(--foreground)]'
+                    : 'border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                }`}
+              >
+                {label}
+              </Link>
+            )
+          })}
+        </div>
 
         {/* Event form */}
         <form onSubmit={form.handleSubmit(onSave)} className="space-y-5 mb-10">
@@ -141,102 +137,22 @@ export default function EditEventPage() {
           <Button type="submit" loading={form.formState.isSubmitting}>Save changes</Button>
         </form>
 
-        {/* Ticket Types */}
+        {/* Ticket types shortcut */}
         <div className="border-t border-[var(--border)] pt-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-serif text-xl">Ticket types</h2>
-            <button onClick={() => setShowTTForm(!showTTForm)} className="btn btn-primary btn-sm gap-2">
-              <Plus className="w-3.5 h-3.5" /> Add type
-            </button>
+          <div className="panel flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold">Ticket types</p>
+              <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                {ticketTypes.length === 0
+                  ? 'No ticket types yet — add some so attendees can register'
+                  : `${ticketTypes.length} type${ticketTypes.length !== 1 ? 's' : ''} · ${ticketTypes.reduce((s, t) => s + (t.soldQuantity ?? 0), 0)} sold`
+                }
+              </p>
+            </div>
+            <Link href={`/organizer/events/${id}/tickets`} className="btn btn-primary btn-sm gap-2 flex-shrink-0">
+              Manage tickets
+            </Link>
           </div>
-
-          {/* Add ticket type form */}
-          {showTTForm && (
-            <form onSubmit={ttForm.handleSubmit(onAddTicketType)} className="panel space-y-4 mb-6 animate-fade-in">
-              <h3 className="font-semibold text-sm">New ticket type</h3>
-              <Input label="Name *" placeholder="e.g. General Admission, VIP" error={ttForm.formState.errors.name?.message} {...ttForm.register('name')} />
-              <Textarea label="Description" rows={2} {...ttForm.register('description')} />
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Price (ETB)" type="number" step="0.01" error={ttForm.formState.errors.price?.message} {...ttForm.register('price', { valueAsNumber: true })} />
-                <Input label="Quantity *" type="number" error={ttForm.formState.errors.quantity?.message} {...ttForm.register('quantity', { valueAsNumber: true })} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Sales start" type="datetime-local" {...ttForm.register('salesStartAt')} />
-                <Input label="Sales end" type="datetime-local" {...ttForm.register('salesEndAt')} />
-              </div>
-              <Input label="Max per order" type="number" {...ttForm.register('maxPerOrder', { valueAsNumber: true })} />
-              <div className="flex gap-3">
-                <Button type="submit" loading={ttForm.formState.isSubmitting}>Add ticket type</Button>
-                <Button type="button" variant="outline" onClick={() => setShowTTForm(false)}>Cancel</Button>
-              </div>
-            </form>
-          )}
-
-          {/* Ticket types list */}
-          {ticketTypes.length === 0 ? (
-            <div className="panel py-8 text-center">
-              <p className="text-xs text-[var(--muted-foreground)]">No ticket types yet. Add one to start selling.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {ticketTypes.map((tt) => (
-                <div key={tt._id} className="panel flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-semibold">{tt.name}</p>
-                      <Badge variant={tt.status === 'active' ? 'success' : tt.status === 'sold_out' ? 'danger' : 'neutral'}>
-                        {tt.status}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-[var(--muted-foreground)]">
-                      {formatCurrency(tt.price, tt.currency)} · {tt.soldQuantity}/{tt.quantity} sold · {tt.availableQuantity ?? (tt.quantity - tt.soldQuantity)} available
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {tt.status === 'active' && (
-                      <button
-                        onClick={async () => {
-                          await eventsApi.pauseTicketType(id, tt._id)
-                          const ttRes = await eventsApi.getTicketTypes(id)
-                          setTicketTypes(ttRes.data ?? [])
-                          toast.success('Sales paused')
-                        }}
-                        className="btn btn-outline btn-sm"
-                      >
-                        Pause
-                      </button>
-                    )}
-                    {tt.status === 'paused' && (
-                      <button
-                        onClick={async () => {
-                          await eventsApi.resumeTicketType(id, tt._id)
-                          const ttRes = await eventsApi.getTicketTypes(id)
-                          setTicketTypes(ttRes.data ?? [])
-                          toast.success('Sales resumed')
-                        }}
-                        className="btn btn-primary btn-sm"
-                      >
-                        Resume
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Scanner link */}
-          {event?.status === 'published' && (
-            <div className="mt-6 panel flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold">QR Check-in Scanner</p>
-                <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Scan tickets at the event entrance</p>
-              </div>
-              <Link href={`/organizer/events/${id}/scanner`} className="btn btn-primary btn-sm gap-2">
-                Open scanner
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </>

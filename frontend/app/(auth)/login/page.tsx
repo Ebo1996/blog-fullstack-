@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -16,20 +16,16 @@ const schema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 })
-
 type FormData = z.infer<typeof schema>
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()
   const { login } = useAuth()
   const [showPass, setShowPass] = useState(false)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  const { register, handleSubmit, formState: { errors, isSubmitting } } =
+    useForm<FormData>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -88,17 +84,21 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <Button type="submit" className="w-full" loading={isSubmitting}>
-          Sign in
-        </Button>
+        <Button type="submit" className="w-full" loading={isSubmitting}>Sign in</Button>
       </form>
 
       <p className="text-center text-xs text-[var(--muted-foreground)] mt-6">
         Don't have an account?{' '}
-        <Link href="/register" className="text-[var(--primary)] hover:underline">
-          Sign up
-        </Link>
+        <Link href="/register" className="text-[var(--primary)] hover:underline">Sign up</Link>
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="card w-full max-w-sm p-8 h-64" />}>
+      <LoginForm />
+    </Suspense>
   )
 }

@@ -9,6 +9,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { UsersModule } from '../users/users.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { EmailService } from '../common/services/email.service';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy, LocalStrategy],
+  providers: [AuthService, JwtStrategy, JwtRefreshStrategy, LocalStrategy, EmailService],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

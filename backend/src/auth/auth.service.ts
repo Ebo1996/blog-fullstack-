@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
-  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { UserRole } from '../common/decorators/roles.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { EmailService } from '../common/services/email.service';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -23,6 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly auditLogsService: AuditLogsService,
+    private readonly emailService: EmailService,
   ) {}
 
   // ─── Validate local credentials ────────────────────────────────
@@ -55,15 +56,16 @@ export class AuthService {
       emailVerificationToken: verificationToken,
     });
 
-    // TODO: send verification email via NotificationsService
+    // Send verification email (non-blocking — never crashes registration)
+    this.emailService
+      .sendVerificationEmail(user.email, user.name, verificationToken)
+      .catch(() => {});
+
     const tokens = await this.generateTokens(user);
     await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
     await this.usersService.updateLastLogin(user._id.toString());
 
-    return {
-      user,
-      ...tokens,
-    };
+    return { user, ...tokens };
   }
 
   // ─── Login ─────────────────────────────────────────────────────
@@ -72,7 +74,6 @@ export class AuthService {
     await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
     await this.usersService.updateLastLogin(user._id.toString());
 
-    // Audit log
     this.auditLogsService.log({
       userId: user._id.toString(),
       action: 'auth.login',
@@ -139,7 +140,11 @@ export class AuthService {
       expires,
     );
 
-    // TODO: send reset email via NotificationsService
+    // Send password reset email (non-blocking)
+    this.emailService
+      .sendPasswordResetEmail(user.email, user.name, token)
+      .catch(() => {});
+
     return { message: 'If that email exists, a reset link has been sent' };
   }
 

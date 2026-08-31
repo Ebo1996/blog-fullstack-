@@ -73,6 +73,9 @@ export const eventsApi = {
   resumeTicketType: (eventId: string, ttId: string) =>
     apiClient.post<any>(`/events/${eventId}/ticket-types/${ttId}/resume`),
 
+  deleteTicketType: (eventId: string, ttId: string) =>
+    apiClient.delete<any>(`/events/${eventId}/ticket-types/${ttId}`),
+
   getCategories: () =>
     apiClient.get<any>('/categories'),
 }

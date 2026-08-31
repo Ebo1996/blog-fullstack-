@@ -9,19 +9,28 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true is required for Chapa webhook HMAC signature verification
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3001);
+  const isProd = configService.get<string>('NODE_ENV') === 'production';
   const frontendUrl = configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
 
-  // Security
-  app.use(helmet());
+  // Security headers
+  app.use(helmet({
+    contentSecurityPolicy: isProd ? undefined : false, // only enforce CSP in production
+    crossOriginEmbedderPolicy: false,                  // required for some image CDNs
+  }));
   app.use(compression());
 
-  // CORS
+  // CORS — only allow localhost in development
+  const allowedOrigins = isProd
+    ? [frontendUrl]
+    : [frontendUrl, 'http://localhost:3000', 'http://127.0.0.1:3000'];
+
   app.enableCors({
-    origin: [frontendUrl, 'http://localhost:3000'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -33,7 +42,7 @@ async function bootstrap() {
   // Versioning
   app.enableVersioning({ type: VersioningType.URI });
 
-  // Global pipes
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -43,14 +52,12 @@ async function bootstrap() {
     }),
   );
 
-  // Global filters
+  // Global filters & interceptors
   app.useGlobalFilters(new HttpExceptionFilter());
-
-  // Global interceptors
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Swagger
-  if (configService.get('NODE_ENV') !== 'production') {
+  // Swagger — dev only
+  if (!isProd) {
     const config = new DocumentBuilder()
       .setTitle('Eventify Ethiopia API')
       .setDescription('Production-grade Event Management & Ticketing Platform API')
@@ -78,7 +85,7 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(`🚀 Eventify API running on: http://localhost:${port}/api`);
-  console.log(`📖 Swagger docs: http://localhost:${port}/api/docs`);
+  if (!isProd) console.log(`📖 Swagger docs: http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

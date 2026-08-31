@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+Allow: /events
+Allow: /events/*
+Allow: /categories
+Allow: /about
+Allow: /contact
+
+# Block authenticated/private routes
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /organizer
+Disallow: /organizer/*
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /payment
+
+# Block API routes
+Disallow: /api/
+
+Sitemap: https://eventify.et/sitemap.xml

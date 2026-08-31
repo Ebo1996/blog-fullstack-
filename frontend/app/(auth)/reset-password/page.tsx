@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -19,19 +19,17 @@ const schema = z.object({
   message: "Passwords don't match",
   path: ['confirm'],
 })
-
 type FormData = z.infer<typeof schema>
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const params = useSearchParams()
   const router = useRouter()
   const token = params.get('token') ?? ''
   const [done, setDone] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  })
+  const { register, handleSubmit, formState: { errors, isSubmitting } } =
+    useForm<FormData>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: FormData) => {
     if (!token) { toast.error('Invalid reset link'); return }
@@ -91,19 +89,19 @@ export default function ResetPasswordPage() {
           {errors.password && <p className="input-error">{errors.password.message}</p>}
         </div>
 
-        <Input
-          id="confirm"
-          label="Confirm password"
-          type="password"
-          placeholder="Repeat your password"
-          error={errors.confirm?.message}
-          {...register('confirm')}
-        />
+        <Input id="confirm" label="Confirm password" type="password"
+          placeholder="Repeat your password" error={errors.confirm?.message} {...register('confirm')} />
 
-        <Button type="submit" className="w-full" loading={isSubmitting}>
-          Update password
-        </Button>
+        <Button type="submit" className="w-full" loading={isSubmitting}>Update password</Button>
       </form>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="card w-full max-w-sm p-8 h-64" />}>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }
