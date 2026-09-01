@@ -58,6 +58,44 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   const res = await fetch(url, fetchOptions)
   const json = await res.json().catch(() => ({}))
 
+  // If 401 and we have a refresh token, try to refresh
+  if (res.status === 401 && typeof window !== 'undefined' && !endpoint.includes('/auth/')) {
+    const refreshToken = localStorage.getItem('refreshToken')
+    if (refreshToken) {
+      try {
+        const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        })
+        
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json()
+          const newAccessToken = refreshData.data?.accessToken || refreshData.accessToken
+          const newRefreshToken = refreshData.data?.refreshToken || refreshData.refreshToken
+          
+          if (newAccessToken) {
+            // Update tokens
+            localStorage.setItem('accessToken', newAccessToken)
+            if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken)
+            _accessToken = newAccessToken
+            
+            // Retry original request with new token
+            headers['Authorization'] = `Bearer ${newAccessToken}`
+            const retryRes = await fetch(url, { ...fetchOptions, headers })
+            const retryJson = await retryRes.json().catch(() => ({}))
+            
+            if (retryRes.ok) {
+              return { data: retryJson.data ?? retryJson }
+            }
+          }
+        }
+      } catch (e) {
+        // Refresh failed, let original error through
+      }
+    }
+  }
+
   if (!res.ok) {
     throw new ApiError(
       res.status,

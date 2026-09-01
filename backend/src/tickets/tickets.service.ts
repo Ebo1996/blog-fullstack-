@@ -76,8 +76,12 @@ export class TicketsService {
 
     if (!ticket) throw new NotFoundException('Ticket not found');
 
-    if (requestingUserId && ticket.ownerId.toString() !== requestingUserId) {
-      throw new ForbiddenException('Access denied');
+    if (requestingUserId) {
+      // ownerId is populated, so we need to access _id
+      const ownerIdStr = (ticket.ownerId as any)?._id?.toString() || ticket.ownerId.toString();
+      if (ownerIdStr !== requestingUserId) {
+        throw new ForbiddenException('Access denied');
+      }
     }
 
     return ticket;

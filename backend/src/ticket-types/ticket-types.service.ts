@@ -36,7 +36,8 @@ export class TicketTypesService {
     userRole: UserRole,
   ): Promise<TicketTypeDocument> {
     const event = await this.eventsService.findById(eventId);
-    if (event.organizerId.toString() !== userId && userRole !== UserRole.ADMIN) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (ownerId.toString() !== userId && userRole !== UserRole.ADMIN) {
       throw new ForbiddenException('You do not own this event');
     }
 
@@ -58,7 +59,8 @@ export class TicketTypesService {
     const tt = await this.findById(id);
     const event = await this.eventsService.findById(tt.eventId.toString());
 
-    if (event.organizerId.toString() !== userId && userRole !== UserRole.ADMIN) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (ownerId.toString() !== userId && userRole !== UserRole.ADMIN) {
       throw new ForbiddenException('You do not own this event');
     }
 
@@ -78,7 +80,8 @@ export class TicketTypesService {
   async pauseSales(id: string, userId: string, userRole: UserRole): Promise<TicketTypeDocument> {
     const tt = await this.findById(id);
     const event = await this.eventsService.findById(tt.eventId.toString());
-    if (event.organizerId.toString() !== userId && userRole !== UserRole.ADMIN) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (ownerId.toString() !== userId && userRole !== UserRole.ADMIN) {
       throw new ForbiddenException('You do not own this event');
     }
     tt.status = TicketTypeStatus.PAUSED;
@@ -89,7 +92,8 @@ export class TicketTypesService {
     const tt = await this.findById(id);
     const event = await this.eventsService.findById(tt.eventId.toString());
 
-    if (event.organizerId.toString() !== userId && userRole !== UserRole.ADMIN) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (ownerId.toString() !== userId && userRole !== UserRole.ADMIN) {
       throw new ForbiddenException('You do not own this event');
     }
 
@@ -106,7 +110,8 @@ export class TicketTypesService {
   async resumeSales(id: string, userId: string, userRole: UserRole): Promise<TicketTypeDocument> {
     const tt = await this.findById(id);
     const event = await this.eventsService.findById(tt.eventId.toString());
-    if (event.organizerId.toString() !== userId && userRole !== UserRole.ADMIN) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (ownerId.toString() !== userId && userRole !== UserRole.ADMIN) {
       throw new ForbiddenException('You do not own this event');
     }
     if (tt.soldQuantity >= tt.quantity) {

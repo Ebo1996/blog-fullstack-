@@ -182,8 +182,8 @@ export class OrdersService {
       callback_url: callbackUrl,
       return_url: returnUrl,
       customization: {
-        title: `Tickets: ${event.title}`,
-        description: `${resolvedItems.map((i) => `${i.quantity}x ${i.ticketTypeName}`).join(', ')}`,
+        title: 'Event Tickets',
+        description: txRef,
       },
     });
 
@@ -240,7 +240,8 @@ export class OrdersService {
     isAdmin = false,
   ) {
     const event = await this.eventsService.findById(eventId);
-    if (!isAdmin && event.organizerId.toString() !== organizerId) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (!isAdmin && ownerId.toString() !== organizerId) {
       throw new ForbiddenException('Access denied');
     }
 

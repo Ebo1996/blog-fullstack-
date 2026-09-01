@@ -34,11 +34,38 @@ export class EmailService {
       return;
     }
 
+    // Resend test mode fix: In development, redirect all emails to the verified address
+    const isDevelopment = this.configService.get<string>('NODE_ENV') !== 'production';
+    const verifiedEmail = 'melalabirhanu285@gmail.com'; // Your verified Resend email
+    
+    let actualRecipient = to;
+    let modifiedSubject = subject;
+    let modifiedHtml = html;
+    
+    if (isDevelopment && to !== verifiedEmail) {
+      actualRecipient = verifiedEmail;
+      modifiedSubject = `[TEST - To: ${to}] ${subject}`;
+      modifiedHtml = `
+        <div style="background:#fffbcc;border:2px solid#f0ad4e;padding:12px;margin-bottom:20px;border-radius:8px">
+          <strong>⚠️ Development Mode - Email Redirect</strong><br>
+          <small>Original recipient: <strong>${to}</strong></small><br>
+          <small>This email was redirected to ${verifiedEmail} because Resend is in test mode.</small>
+        </div>
+        ${html}
+      `;
+      this.logger.warn(`[EmailService] Redirecting email from ${to} to ${verifiedEmail} (development mode)`);
+    }
+
     try {
-      await this.transporter.sendMail({ from: this.from, to, subject, html });
-      this.logger.log(`Email sent to ${to}: ${subject}`);
+      await this.transporter.sendMail({ 
+        from: this.from, 
+        to: actualRecipient, 
+        subject: modifiedSubject, 
+        html: modifiedHtml 
+      });
+      this.logger.log(`Email sent to ${actualRecipient}: ${subject}`);
     } catch (err) {
-      this.logger.error(`Failed to send email to ${to}: ${err?.message}`);
+      this.logger.error(`Failed to send email to ${actualRecipient}: ${err?.message}`);
       // Don't throw — email failure should never crash the request
     }
   }

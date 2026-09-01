@@ -13,7 +13,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    ordersApi.list({ limit: 50 })
+    ordersApi.list()
       .then((r) => setOrders(r.data?.orders ?? r.data ?? []))
       .catch(() => {})
       .finally(() => setLoading(false))

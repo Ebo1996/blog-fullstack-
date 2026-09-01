@@ -13,7 +13,7 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    ticketsApi.list({ limit: 50 })
+    ticketsApi.list()
       .then((r) => {
         const d = r.data as any
         setTickets(d?.tickets ?? d ?? [])
@@ -54,8 +54,9 @@ export default function TicketsPage() {
             {tickets.map((ticket, i) => {
               const badge = getTicketStatusBadge(ticket.status)
               const colorClass = getEventColorClass(i)
+              const ticketId = String(ticket._id)
               return (
-                <Link key={ticket._id} href={`/dashboard/tickets/${ticket._id}`} className="ticket-card relative">
+                <Link key={ticket._id} href={`/dashboard/tickets/${ticketId}`} className="ticket-card relative">
                   <div className={`ticket-card-art event-art ${colorClass}`} style={{ fontSize: 32 }}>
                     <span className="relative z-10">{ticket.eventId?.title?.split(' ').map((w: string) => w[0]).join('').slice(0, 3) ?? 'EV'}</span>
                   </div>

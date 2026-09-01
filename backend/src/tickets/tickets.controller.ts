@@ -1,18 +1,34 @@
 import {
   Controller, Get, Param, Query, UseGuards, HttpCode, HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 import { TicketsService } from './tickets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { TicketStatus } from './schemas/ticket.schema';
-import { IsOptional, IsEnum } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
 
 class TicketQueryDto {
-  @ApiPropertyOptional() page?: number;
-  @ApiPropertyOptional() limit?: number;
-  @ApiPropertyOptional({ enum: TicketStatus }) status?: TicketStatus;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({ enum: TicketStatus })
+  @IsOptional()
+  @IsEnum(TicketStatus)
+  status?: TicketStatus;
 }
 
 @ApiTags('tickets')

@@ -7,7 +7,7 @@ import { setAccessToken } from './api/client'
 interface AuthContextType {
   user: User | null
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User>
   logout: () => Promise<void>
   refresh: () => Promise<void>
   setUser: (u: User | null) => void
@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('accessToken', accessToken)
     localStorage.setItem('refreshToken', refreshToken)
     setUser(u)
+    return u
   }, [])
 
   const logout = useCallback(async () => {

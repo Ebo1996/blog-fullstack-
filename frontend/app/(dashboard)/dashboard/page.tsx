@@ -20,13 +20,17 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     Promise.all([
-      ticketsApi.list({ limit: 3, status: 'active' }),
-      ordersApi.list({ limit: 5 }),
+      ticketsApi.list(),
+      ordersApi.list(),
     ]).then(([tRes, oRes]) => {
       const td = tRes.data as any
       const od = oRes.data as any
-      setTickets(td?.tickets ?? td ?? [])
-      setOrders(od?.orders ?? od ?? [])
+      // Take first 3 active tickets and first 5 orders
+      const allTickets = td?.tickets ?? td ?? []
+      const activeTickets = allTickets.filter((t: any) => t.status === 'active')
+      setTickets(activeTickets.slice(0, 3))
+      const allOrders = od?.orders ?? od ?? []
+      setOrders(allOrders.slice(0, 5))
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
@@ -171,8 +175,9 @@ export default function DashboardOverviewPage() {
 
 function TicketCard({ ticket, featured }: { ticket: any; featured: boolean }) {
   const colorClass = getEventColorClass(featured ? 0 : 1)
+  const ticketId = String(ticket._id)
   return (
-    <Link href={`/dashboard/tickets/${ticket._id}`} className="ticket-card">
+    <Link href={`/dashboard/tickets/${ticketId}`} className="ticket-card">
       <div className={`ticket-card-art event-art ${colorClass}`} style={{ fontSize: featured ? 40 : 24 }}>
         <span className="relative z-10">
           {ticket.eventId?.title?.split(' ').map((w: string) => w[0]).join('').slice(0, 3) ?? 'EV'}

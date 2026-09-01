@@ -7,6 +7,7 @@ const nextConfig = {
     remotePatterns: [
       // Only production image sources — no placeholder domains
       { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
 

@@ -12,8 +12,12 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true)
 
   const load = () => {
-    notificationsApi.list({ limit: 50 })
-      .then((r) => setNotifications(r.data?.notifications ?? r.data ?? []))
+    notificationsApi.list()
+      .then((r) => {
+        const allNotifications = r.data?.notifications ?? r.data ?? []
+        // Take first 50 notifications
+        setNotifications(allNotifications.slice(0, 50))
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }

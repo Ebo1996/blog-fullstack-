@@ -10,7 +10,7 @@ export enum TicketTypeStatus {
   EXPIRED = 'expired',
 }
 
-@Schema({ timestamps: true, collection: 'ticketTypes' })
+@Schema({ timestamps: true, collection: 'tickettypes' })
 export class TicketType {
   _id: Types.ObjectId;
 
@@ -78,5 +78,6 @@ TicketTypeSchema.virtual('isSoldOut').get(function () {
   return this.soldQuantity >= this.quantity;
 });
 
+// Ensure virtuals are included in JSON and Object representations
 TicketTypeSchema.set('toJSON', { virtuals: true });
 TicketTypeSchema.set('toObject', { virtuals: true });

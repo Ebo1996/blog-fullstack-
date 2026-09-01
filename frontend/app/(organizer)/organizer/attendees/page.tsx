@@ -30,12 +30,16 @@ export default function OrganizerAttendeesPage() {
     if (!selectedEvent) return
     setLoading(true)
     ticketsApi.checkInsByEvent(selectedEvent)
-      .then((r) => setAttendees(r.data?.tickets ?? r.data ?? []))
+      .then((r) => {
+        const data = r.data?.tickets ?? r.data ?? []
+        // Ensure it's always an array
+        setAttendees(Array.isArray(data) ? data : [])
+      })
       .catch(() => setAttendees([]))
       .finally(() => setLoading(false))
   }, [selectedEvent])
 
-  const filtered = attendees.filter((a) => {
+  const filtered = Array.isArray(attendees) ? attendees.filter((a) => {
     if (!search) return true
     const q = search.toLowerCase()
     return (
@@ -43,7 +47,7 @@ export default function OrganizerAttendeesPage() {
       a.ownerId?.email?.toLowerCase().includes(q) ||
       a.ticketCode?.toLowerCase().includes(q)
     )
-  })
+  }) : []
 
   const exportCSV = () => {
     if (filtered.length === 0) return

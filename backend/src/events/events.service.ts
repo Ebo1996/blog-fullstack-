@@ -365,7 +365,8 @@ export class EventsService {
     isAdmin: boolean,
   ): void {
     if (isAdmin) return;
-    if (event.organizerId.toString() !== userId) {
+    const ownerId = (event.organizerId as any)?._id || event.organizerId;
+    if (ownerId.toString() !== userId) {
       throw new ForbiddenException('You do not own this event');
     }
   }

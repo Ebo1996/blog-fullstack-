@@ -6,6 +6,7 @@ import { Calendar, MapPin, Users, ArrowLeft } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { EventCard } from '@/components/events/event-card'
 import { TicketPurchasePanel } from './ticket-purchase-panel'
+import { MobileTicketCTA } from './mobile-ticket-cta'
 import { formatDateTime, getEventColorClass, truncate } from '@/lib/utils'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api'
@@ -272,26 +273,11 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
 
       {/* ── Mobile sticky bottom CTA (hidden on lg+) ─────────────── */}
       {canPurchase && ticketTypes.length > 0 && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur-sm px-4 py-3 flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold truncate">{event.title}</p>
-            <p className="text-xs text-[var(--muted-foreground)]">
-              {ticketTypes.some((t: any) => t.price === 0)
-                ? 'Free'
-                : `From ETB ${Math.min(...ticketTypes.map((t: any) => t.price)).toLocaleString()}`}
-            </p>
-          </div>
-          <a
-            href="#tickets-panel"
-            className="btn btn-primary btn-sm flex-shrink-0"
-            onClick={(e) => {
-              e.preventDefault()
-              document.getElementById('tickets-panel')?.scrollIntoView({ behavior: 'smooth' })
-            }}
-          >
-            Get tickets
-          </a>
-        </div>
+        <MobileTicketCTA
+          eventTitle={event.title}
+          minPrice={Math.min(...ticketTypes.map((t: any) => t.price))}
+          hasFreeTickets={ticketTypes.some((t: any) => t.price === 0)}
+        />
       )}
 
       {/* Related events */}

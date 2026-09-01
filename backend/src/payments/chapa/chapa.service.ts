@@ -42,9 +42,11 @@ export class ChapaService {
       );
       return response.data;
     } catch (error: any) {
+      const errorMsg = error?.response?.data?.message || error?.response?.data || error.message;
       this.logger.error(
-        `Chapa initialize failed: ${error?.response?.data?.message ?? error.message}`,
+        `Chapa initialize failed: ${JSON.stringify(errorMsg)}`,
       );
+      this.logger.error(`Payload sent: ${JSON.stringify(payload)}`);
       throw new InternalServerErrorException(
         'Payment initialization failed. Please try again.',
       );

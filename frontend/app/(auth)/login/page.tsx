@@ -29,10 +29,20 @@ function LoginForm() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await login(data.email, data.password)
+      const user = await login(data.email, data.password)
       toast.success('Welcome back!')
-      const redirect = params.get('redirect') ?? '/dashboard'
-      router.push(redirect)
+      
+      // Redirect based on role
+      const redirect = params.get('redirect')
+      if (redirect) {
+        router.push(redirect)
+      } else if (user.role === 'admin') {
+        router.push('/admin')
+      } else if (user.role === 'organizer') {
+        router.push('/organizer')
+      } else {
+        router.push('/dashboard')
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Invalid email or password'
       toast.error(msg)

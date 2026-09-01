@@ -103,15 +103,31 @@ export default function TicketDetailPage() {
 
         {/* Digital ticket */}
         <div className="digital-ticket mb-6">
+          {/* Decorative corner accent */}
+          <div style={{ position: 'absolute', top: 30, right: 30, width: 80, height: 80, opacity: 0.06, pointerEvents: 'none' }}>
+            <svg viewBox="0 0 100 100" fill="currentColor">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" fill="none" />
+              <circle cx="50" cy="50" r="30" stroke="currentColor" strokeWidth="1.5" fill="none" />
+              <circle cx="50" cy="50" r="20" stroke="currentColor" strokeWidth="1" fill="none" />
+            </svg>
+          </div>
+          
           <div className="flex justify-between items-start gap-4">
             <div>
-              <span className={`badge ${badge.cls} mb-3`}><span className="badge-dot" />{badge.label}</span>
+              <span className={`badge ${badge.cls} mb-3`} style={{ fontSize: 11, padding: '5px 12px', borderRadius: 24, fontWeight: 800, letterSpacing: '0.08em' }}>
+                <span className="badge-dot" style={{ width: 6, height: 6 }} />
+                {badge.label}
+              </span>
               <h2>{event.title ?? 'Event'}</h2>
-              <p style={{ color: '#6f6e65', fontSize: 12, margin: '4px 0' }}>
+              <p style={{ color: '#6f6e65', fontSize: 13, margin: '6px 0', fontWeight: 500 }}>
                 {event.startAt ? formatDateTime(event.startAt) : '—'}
               </p>
               {event.venue && (
-                <p style={{ color: '#6f6e65', fontSize: 12 }}>
+                <p style={{ color: '#77766f', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
                   {[event.venue.name, event.venue.address, event.venue.city].filter(Boolean).join(', ')}
                 </p>
               )}
@@ -123,14 +139,14 @@ export default function TicketDetailPage() {
             <div className="qr-frame">
               <QRCodeSVG
                 value={ticket.qrToken}
-                size={155}
+                size={176}
                 bgColor="#ffffff"
                 fgColor="#151512"
                 level="H"
               />
             </div>
-            <strong style={{ fontSize: 12, color: '#171713' }}>Scan at entry</strong>
-            <span style={{ color: '#77766f', fontSize: 10 }}>Ticket ID: {ticket.ticketCode}</span>
+            <strong style={{ fontSize: 13, color: '#171713', fontWeight: 700, letterSpacing: '0.02em' }}>Scan at entry</strong>
+            <span style={{ color: '#77766f', fontSize: 11, fontFamily: 'monospace', letterSpacing: '0.05em' }}>#{ticket.ticketCode}</span>
           </div>
 
           {/* Ticket details */}
@@ -145,7 +161,7 @@ export default function TicketDetailPage() {
             </div>
             <div>
               <span>TICKET #</span>
-              <strong className="font-mono text-xs">{ticket.ticketCode}</strong>
+              <strong className="font-mono text-xs" style={{ fontSize: 13, letterSpacing: '0.05em' }}>{ticket.ticketCode}</strong>
             </div>
             {ticket.status === 'used' && ticket.checkedInAt && (
               <div>

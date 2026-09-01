@@ -145,16 +145,18 @@ export default function CreateEventPage() {
 
       // Upload image if one was selected
       if (imageFile) {
-        await uploadImage(eventId)
+        const imageUrl = await uploadImage(eventId)
+        if (imageUrl) {
+          // Update event with imageUrl
+          await apiClient.patch(`/events/${eventId}`, { imageUrl })
+        }
       }
 
       // Create ticket types
       await createTicketTypes(eventId)
 
       if (publish) {
-        if (!imageFile && !imagePreview) {
-          toast.error('An image is required to publish. Event saved as draft.')
-        } else if (ticketTypes.length === 0) {
+        if (ticketTypes.length === 0) {
           toast.error('At least one ticket type is required. Event saved as draft.')
         } else {
           await eventsApi.publish(eventId)
@@ -468,9 +470,9 @@ export default function CreateEventPage() {
                 <ReviewRow label="Ticket types" value={`${ticketTypes.length} type(s)`} />
               </div>
               
-              {!imageFile && (
+              {!imageFile && !imagePreview && (
                 <div className="card p-4 border-[var(--warning)]/40" style={{ borderColor: '#f59e0b55' }}>
-                  <p className="text-xs text-yellow-400">⚠️ No image selected. Required to publish.</p>
+                  <p className="text-xs text-yellow-400">⚠️ No image selected. You can add one later from the event editor.</p>
                 </div>
               )}
               
