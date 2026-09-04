@@ -17,10 +17,22 @@ export class UpdateUserDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  phone?: string;
+  phoneNumber?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsUrl()
   image?: string;
+
+  // For password changes
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  currentPassword?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  newPassword?: string;
 }

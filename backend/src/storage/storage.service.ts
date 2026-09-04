@@ -24,6 +24,7 @@ export class StorageService {
     folder: string,
     fileName: string,
   ): Promise<{ url: string; publicId: string }> {
+    this.logger.log(`Starting upload to folder: ${folder}, fileName: ${fileName}`);
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -37,9 +38,10 @@ export class StorageService {
         },
         (error, result: UploadApiResponse) => {
           if (error) {
-            this.logger.error(`Cloudinary upload failed: ${error.message}`);
+            this.logger.error(`Cloudinary upload failed: ${error.message}`, error.stack);
             reject(new BadRequestException('Image upload failed'));
           } else {
+            this.logger.log(`Upload successful: ${result.secure_url}`);
             resolve({ url: result.secure_url, publicId: result.public_id });
           }
         },

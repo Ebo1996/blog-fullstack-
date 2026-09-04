@@ -55,7 +55,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Link>
           </div>
           <div className="profile-row">
-            <span className="avatar w-8 h-8 text-xs">{getInitials(user.name)}</span>
+            {user.image ? (
+              <img 
+                src={user.image} 
+                alt={user.name} 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <span className="avatar w-8 h-8 text-xs">{getInitials(user.name)}</span>
+            )}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold truncate">{user.name}</p>
               <p className="text-xs text-[var(--muted-foreground)] truncate">{user.email}</p>
