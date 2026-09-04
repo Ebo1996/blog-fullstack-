@@ -165,7 +165,7 @@ export default function CreateEventPage() {
       } else {
         toast.success('Event saved as draft')
       }
-      router.push(`/organizer/events/${eventId}`)
+      router.push(`/organizer/events/${eventId}/edit`)
     } catch (err: any) {
       toast.error(err?.message ?? 'Failed to create event')
     } finally {
@@ -471,8 +471,11 @@ export default function CreateEventPage() {
               </div>
               
               {!imageFile && !imagePreview && (
-                <div className="card p-4 border-[var(--warning)]/40" style={{ borderColor: '#f59e0b55' }}>
-                  <p className="text-xs text-yellow-400">⚠️ No image selected. You can add one later from the event editor.</p>
+                <div className="card p-4" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: '#f59e0b' }}>
+                  <p className="text-xs flex items-center gap-2">
+                    <span className="text-lg">⚠️</span>
+                    <span><strong>Event must have an image before publishing.</strong> Upload an image in step 4 or save as draft and add it later.</span>
+                  </p>
                 </div>
               )}
               
@@ -507,6 +510,8 @@ export default function CreateEventPage() {
                   type="button"
                   loading={submitting || uploading}
                   onClick={handleSubmit((d) => onSubmit(d, true))}
+                  disabled={!imageFile && !imagePreview}
+                  title={!imageFile && !imagePreview ? 'Event must have an image before publishing' : undefined}
                 >
                   Publish event 🚀
                 </Button>

@@ -31,6 +31,9 @@ export const eventsApi = {
   getBySlug: (slug: string) =>
     apiClient.get<any>(`/events/${slug}`),
 
+  getById: (id: string) =>
+    apiClient.get<any>(`/events/organizer/event/${id}`),
+
   related: (id: string, limit = 4) =>
     apiClient.get<any>(`/events/${id}/related`, { params: { limit } }),
 

@@ -69,7 +69,7 @@ export default function TicketTypesPage() {
   const reload = async () => {
     try {
       const [evRes, ttRes] = await Promise.all([
-        eventsApi.getBySlug(id),
+        eventsApi.getById(id),
         eventsApi.getTicketTypes(id),
       ])
       setEvent(evRes.data)

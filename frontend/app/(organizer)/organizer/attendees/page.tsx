@@ -29,11 +29,10 @@ export default function OrganizerAttendeesPage() {
   useEffect(() => {
     if (!selectedEvent) return
     setLoading(true)
-    ticketsApi.checkInsByEvent(selectedEvent)
+    ticketsApi.byEvent(selectedEvent, { limit: 1000 })
       .then((r) => {
-        const data = r.data?.tickets ?? r.data ?? []
-        // Ensure it's always an array
-        setAttendees(Array.isArray(data) ? data : [])
+        const tickets = r.data?.tickets ?? r.data ?? []
+        setAttendees(Array.isArray(tickets) ? tickets : [])
       })
       .catch(() => setAttendees([]))
       .finally(() => setLoading(false))

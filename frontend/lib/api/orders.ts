@@ -21,6 +21,9 @@ export const ordersApi = {
   eventOrders: (eventId: string, params?: any) =>
     apiClient.get<any>(`/orders/event/${eventId}`, { params }),
 
+  getByEvent: (eventId: string, params?: any) =>
+    apiClient.get<any>(`/orders/event/${eventId}`, { params }),
+
   // Admin
   adminList: (params?: any) =>
     apiClient.get<any>('/admin/orders', { params }),

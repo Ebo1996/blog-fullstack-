@@ -120,11 +120,27 @@ export class TicketsService {
 
   async findByEvent(
     eventId: string,
+    organizerId: string,
+    isAdmin: boolean,
     page = 1,
-    limit = 20,
-    search?: string,
+    limit = 100,
   ) {
-    const filter: any = { eventId: new Types.ObjectId(eventId) };
+    // Verify the organizer owns this event (unless admin)
+    if (!isAdmin) {
+      const Event = this.ticketModel.db.model('Event');
+      const event = await Event.findById(eventId);
+      if (!event) throw new NotFoundException('Event not found');
+      
+      const eventOrganizerId = event.organizerId?._id 
+        ? event.organizerId._id.toString() 
+        : event.organizerId?.toString();
+      
+      if (eventOrganizerId !== organizerId) {
+        throw new ForbiddenException('Access denied');
+      }
+    }
+
+    const filter: any = { eventId: new Types.ObjectId(eventId), status: { $ne: TicketStatus.CANCELLED } };
 
     const [tickets, total] = await Promise.all([
       this.ticketModel

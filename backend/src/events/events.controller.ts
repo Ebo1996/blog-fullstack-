@@ -1,7 +1,7 @@
 import {
   Controller, Get, Post, Patch, Delete,
   Body, Param, Query, UseGuards,
-  HttpCode, HttpStatus,
+  HttpCode, HttpStatus, NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { EventsService } from './events.service';
@@ -99,6 +99,41 @@ export class EventsController {
   ) {
     const result = await this.eventsService.findByOrganizer(userId, query);
     return { success: true, ...result };
+  }
+
+  @Get('organizer/event/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: '[Organizer] Get event by ID (including drafts)' })
+  async getOrganizerEvent(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ) {
+    console.log(`[getOrganizerEvent] User ${user.sub} requesting event ${id}`);
+    try {
+      const event = await this.eventsService.findById(id);
+      
+      // Extract organizer ID (could be populated or just ID)
+      const organizerId = event.organizerId?._id 
+        ? event.organizerId._id.toString() 
+        : event.organizerId?.toString();
+      
+      console.log(`[getOrganizerEvent] Event found: ${event._id}, organizer ID: ${organizerId}`);
+      
+      // Verify ownership (unless admin)
+      const isAdmin = user.role === UserRole.ADMIN;
+      if (!isAdmin && organizerId !== user.sub) {
+        console.log(`[getOrganizerEvent] Access denied: event organizer ${organizerId} != user ${user.sub}`);
+        throw new NotFoundException('Event not found');
+      }
+      
+      console.log(`[getOrganizerEvent] Access granted, returning event`);
+      return { success: true, data: event };
+    } catch (error) {
+      console.error(`[getOrganizerEvent] Error:`, error.message);
+      throw error;
+    }
   }
 
   @Patch(':id')

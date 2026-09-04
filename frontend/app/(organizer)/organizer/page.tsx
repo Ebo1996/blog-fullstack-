@@ -92,7 +92,7 @@ export default function OrganizerOverviewPage() {
                 return (
                   <Link
                     key={event._id}
-                    href={`/organizer/events/${event._id}`}
+                    href={`/organizer/events/${event._id}/edit`}
                     className="flex items-center gap-4 py-3.5 border-t border-[var(--border)] hover:bg-[var(--muted)] -mx-6 px-6 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center flex-shrink-0 text-xs font-bold">

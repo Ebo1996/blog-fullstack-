@@ -13,6 +13,9 @@ export const ticketsApi = {
   byOrder: (orderId: string) =>
     apiClient.get<any>(`/tickets/order/${orderId}`),
 
+  byEvent: (eventId: string, params?: { page?: number; limit?: number }) =>
+    apiClient.get<any>(`/tickets/event/${eventId}/tickets`, { params }),
+
   // Transfers
   initiateTransfer: (ticketId: string, recipientEmail: string, message?: string) =>
     apiClient.post<any>('/transfers', { ticketId, recipientEmail, message }),

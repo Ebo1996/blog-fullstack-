@@ -6,6 +6,8 @@ import { IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TicketsService } from './tickets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles, UserRole } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { TicketStatus } from './schemas/ticket.schema';
 
@@ -78,5 +80,25 @@ export class TicketsController {
   async findByOrder(@Param('orderId') orderId: string) {
     const data = await this.ticketsService.findByOrder(orderId);
     return { success: true, data };
+  }
+
+  // Organizer: Get all tickets for their event
+  @Get('event/:eventId/tickets')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+  @ApiOperation({ summary: '[Organizer] Get all tickets for an event' })
+  async findByEvent(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: any,
+    @Query() query: TicketQueryDto,
+  ) {
+    const result = await this.ticketsService.findByEvent(
+      eventId,
+      user.sub,
+      user.role === UserRole.ADMIN,
+      query.page,
+      query.limit,
+    );
+    return { success: true, ...result };
   }
 }
