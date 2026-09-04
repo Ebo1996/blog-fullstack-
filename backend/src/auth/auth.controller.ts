@@ -14,7 +14,6 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import { ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -26,6 +25,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { ThrottleStrict } from '../common/decorators/throttle-strict.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -34,7 +34,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  @UseGuards(ThrottlerGuard)
+  @ThrottleStrict()
   @ApiOperation({ summary: 'Register a new account' })
   async register(@Body() dto: RegisterDto) {
     const result = await this.authService.register(dto);
@@ -44,7 +44,8 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard, LocalAuthGuard)
+  @ThrottleStrict()
+  @UseGuards(LocalAuthGuard)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
   async login(@CurrentUser() user: any) {
@@ -83,7 +84,7 @@ export class AuthController {
   @Public()
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
+  @ThrottleStrict()
   @ApiOperation({ summary: 'Request password reset link' })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     const result = await this.authService.forgotPassword(dto.email);
@@ -93,6 +94,7 @@ export class AuthController {
   @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @ThrottleStrict()
   @ApiOperation({ summary: 'Reset password using token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     const result = await this.authService.resetPassword(dto.token, dto.password);

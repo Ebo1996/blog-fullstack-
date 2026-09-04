@@ -124,6 +124,17 @@ export class PaymentsService {
     const txRef = order.payment?.checkoutReference || txRefOrOrderId;
     const isFreeOrder = order.totalAmount === 0;
 
+    // Idempotency check: if order is already PAID and tickets are generated, return early
+    if (order.status === OrderStatus.PAID && order.ticketsGenerated) {
+      this.logger.log(`[PaymentsService] Order ${order._id} already processed - returning cached result`);
+      return { order, alreadyProcessed: true };
+    }
+
+    // Additional safety check: if status is PAID but ticketsGenerated is false, something went wrong
+    if (order.status === OrderStatus.PAID && !order.ticketsGenerated) {
+      this.logger.warn(`[PaymentsService] Order ${order._id} is PAID but tickets not generated - will regenerate`);
+    }
+
     let verification: any = null;
 
     // For paid orders, always re-verify with Chapa

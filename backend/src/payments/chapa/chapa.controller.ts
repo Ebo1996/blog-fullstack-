@@ -18,6 +18,27 @@ export class ChapaController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   /**
+   * Confirm free order and generate tickets
+   */
+  @Post('confirm-free/:orderId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirm free order and generate tickets' })
+  async confirmFreeOrder(
+    @Param('orderId') orderId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    try {
+      await this.paymentsService.confirmPayment(orderId);
+      return { success: true, message: 'Free tickets generated successfully' };
+    } catch (error) {
+      this.logger.error(`Failed to confirm free order: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * POST /payments/chapa/verify/:reference
    * Called by the frontend after Chapa redirect returns.
    * Backend re-verifies with Chapa — never trusts frontend claim.

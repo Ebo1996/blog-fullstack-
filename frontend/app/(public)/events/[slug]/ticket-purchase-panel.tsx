@@ -79,7 +79,19 @@ export function TicketPurchasePanel({ event, ticketTypes, canPurchase }: Props) 
       const { checkoutUrl, isFree, order } = res.data
       
       if (isFree) {
-        // Free order - redirect to success page directly
+        // Free order - confirm it to generate tickets
+        try {
+          await fetch(`http://localhost:3001/api/payments/chapa/confirm-free/${order._id}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          })
+        } catch (err) {
+          console.error('Failed to confirm free order:', err)
+        }
+        
+        // Redirect to success page
         toast.success('Free tickets obtained successfully!')
         window.location.href = `/payment/success?tx_ref=${order.payment?.checkoutReference || order._id}`
       } else {

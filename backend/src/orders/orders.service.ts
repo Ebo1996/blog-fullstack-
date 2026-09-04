@@ -310,31 +310,3 @@ export class OrdersService {
     return this.findById(id, userId, isAdmin);
   }
 }
-
-  /**
-   * Confirm a free order and trigger ticket generation.
-   * This is called immediately after creating a free order.
-   */
-  async confirmFreeOrder(orderId: string): Promise<void> {
-    const order = await this.orderModel.findById(orderId);
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
-
-    if (order.totalAmount > 0) {
-      throw new BadRequestException('This method is only for free orders');
-    }
-
-    if (order.status !== OrderStatus.COMPLETED) {
-      throw new BadRequestException('Order is not in completed status');
-    }
-
-    this.logger.log(`[OrdersService] Confirming free order ${orderId} and generating tickets`);
-
-    // Use the PaymentsService to confirm and generate tickets
-    if (this.paymentsService && typeof this.paymentsService.confirmPayment === 'function') {
-      await this.paymentsService.confirmPayment(orderId);
-    } else {
-      this.logger.error('[OrdersService] PaymentsService not available for free order confirmation');
-    }
-  }

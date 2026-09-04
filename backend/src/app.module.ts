@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './admin/admin.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { StorageModule } from './storage/storage.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { StorageModule } from './storage/storage.module';
     AdminModule,
     AuditLogsModule,
     StorageModule,
+    HealthModule,
   ],
   providers: [
     // Apply ThrottlerGuard to every endpoint globally
