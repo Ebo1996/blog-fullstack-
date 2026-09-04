@@ -8,6 +8,7 @@ import { EventsModule } from '../events/events.module';
 import { UsersModule } from '../users/users.module';
 import { ChapaService } from '../payments/chapa/chapa.service';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
     EventsModule,
     UsersModule,
     AuditLogsModule,
+    PaymentsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, ChapaService],

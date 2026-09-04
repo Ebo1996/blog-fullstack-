@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { authApi } from '@/lib/api/auth'
+import { storageApi } from '@/lib/api/storage'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,7 +11,7 @@ import { toast } from 'sonner'
 import { Input, Textarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { getInitials, formatDate } from '@/lib/utils'
-import { Camera } from 'lucide-react'
+import { Camera, Loader2 } from 'lucide-react'
 
 const schema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -21,6 +23,8 @@ type FormData = z.infer<typeof schema>
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth()
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -41,6 +45,39 @@ export default function ProfilePage() {
     }
   }
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB')
+      return
+    }
+
+    setUploadingAvatar(true)
+    try {
+      const uploadRes = await storageApi.uploadAvatar(file)
+      const imageUrl = uploadRes.data.url
+      
+      const updateRes = await authApi.updateMe({ image: imageUrl })
+      setUser(updateRes.data)
+      toast.success('Profile picture updated')
+    } catch (err: any) {
+      console.error('Avatar upload error:', err)
+      toast.error(err?.response?.data?.message ?? 'Failed to upload image')
+    } finally {
+      setUploadingAvatar(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   return (
     <>
       <header className="topbar">
@@ -54,14 +91,37 @@ export default function ProfilePage() {
         {/* Avatar */}
         <div className="panel flex items-center gap-5 mb-8">
           <div className="relative">
-            <span className="avatar flex items-center justify-center text-base font-bold"
-              style={{ width: 64, height: 64, fontSize: 22 }}>
-              {getInitials(user?.name ?? '')}
-            </span>
+            {user?.image ? (
+              <img 
+                src={user.image} 
+                alt={user.name} 
+                className="rounded-full object-cover"
+                style={{ width: 64, height: 64 }}
+              />
+            ) : (
+              <span className="avatar flex items-center justify-center text-base font-bold"
+                style={{ width: 64, height: 64, fontSize: 22 }}>
+                {getInitials(user?.name ?? '')}
+              </span>
+            )}
+            {uploadingAvatar && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
             <button
-              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--primary)] flex items-center justify-center"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[var(--primary)] flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-50"
               aria-label="Change avatar"
-              title="Avatar upload requires Cloudinary configuration"
             >
               <Camera className="w-3 h-3 text-[var(--primary-foreground)]" />
             </button>

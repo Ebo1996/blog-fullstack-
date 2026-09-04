@@ -76,9 +76,16 @@ export function TicketPurchasePanel({ event, ticketTypes, canPurchase }: Props) 
     setLoading(true)
     try {
       const res = await ordersApi.create(event._id, items)
-      const { checkoutUrl } = res.data
-      // Redirect to Chapa checkout
-      window.location.href = checkoutUrl
+      const { checkoutUrl, isFree, order } = res.data
+      
+      if (isFree) {
+        // Free order - redirect to success page directly
+        toast.success('Free tickets obtained successfully!')
+        window.location.href = `/payment/success?tx_ref=${order.payment?.checkoutReference || order._id}`
+      } else {
+        // Paid order - redirect to Chapa checkout
+        window.location.href = checkoutUrl
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? 'Failed to create order. Please try again.'
       toast.error(msg)

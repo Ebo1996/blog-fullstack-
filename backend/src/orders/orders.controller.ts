@@ -44,12 +44,13 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create order and initialize Chapa payment' })
+  @ApiOperation({ summary: 'Create order and initialize Chapa payment (or complete free order)' })
   async create(
     @CurrentUser('sub') userId: string,
     @Body() dto: CreateOrderDto,
   ) {
     const data = await this.ordersService.createAndInitialize(userId, dto);
+    
     return { success: true, data };
   }
 

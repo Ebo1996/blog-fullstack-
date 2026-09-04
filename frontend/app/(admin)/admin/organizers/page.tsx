@@ -98,7 +98,15 @@ export default function AdminOrganizersPage() {
                   <tr key={u._id}>
                     <td>
                       <div className="flex items-center gap-3">
-                        <span className="avatar w-8 h-8 text-xs flex-shrink-0">{getInitials(u.name)}</span>
+                        {u.image ? (
+                          <img 
+                            src={u.image} 
+                            alt={u.name} 
+                            className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <span className="avatar w-8 h-8 text-xs flex-shrink-0">{getInitials(u.name)}</span>
+                        )}
                         <div>
                           <p className="text-xs font-medium">{u.name}</p>
                           <p className="text-xs text-[var(--muted-foreground)]">{u.email}</p>

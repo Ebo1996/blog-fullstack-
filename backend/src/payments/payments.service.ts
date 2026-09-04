@@ -103,29 +103,50 @@ export class PaymentsService {
 
   /**
    * Core fulfillment logic wrapped in a MongoDB transaction.
-   * 1. Re-verify with Chapa API
+   * 1. Re-verify with Chapa API (skip for free orders)
    * 2. Update order status
    * 3. Generate tickets
    * All in one atomic operation.
    */
-  private async confirmPayment(txRef: string, order: OrderDocument) {
-    // Always re-verify with Chapa, never trust webhook payload alone
-    const verification = await this.chapaService.verify(txRef);
+  async confirmPayment(txRefOrOrderId: string, existingOrder?: OrderDocument) {
+    // Find order if not provided
+    const order = existingOrder || await this.orderModel.findOne({
+      $or: [
+        { 'payment.checkoutReference': txRefOrOrderId },
+        { _id: Types.ObjectId.isValid(txRefOrOrderId) ? new Types.ObjectId(txRefOrOrderId) : null },
+      ],
+    }).populate('eventId', 'title organizerId');
 
-    if (verification.data.status !== 'success') {
-      await this.markOrderFailed(txRef, `Chapa verify status: ${verification.data.status}`);
-      throw new BadRequestException('Payment was not successful');
+    if (!order) {
+      throw new NotFoundException('Order not found');
     }
 
-    // Verify amount matches what was ordered (prevent price tampering)
-    const verifiedAmount = parseFloat(verification.data.amount);
-    const tolerance = 0.01;
-    if (Math.abs(verifiedAmount - order.totalAmount) > tolerance) {
-      this.logger.error(
-        `Amount mismatch for ${txRef}: expected ${order.totalAmount}, got ${verifiedAmount}`,
-      );
-      await this.markOrderFailed(txRef, 'Amount mismatch');
-      throw new BadRequestException('Payment amount does not match order amount');
+    const txRef = order.payment?.checkoutReference || txRefOrOrderId;
+    const isFreeOrder = order.totalAmount === 0;
+
+    let verification: any = null;
+
+    // For paid orders, always re-verify with Chapa
+    if (!isFreeOrder) {
+      verification = await this.chapaService.verify(txRef);
+
+      if (verification.data.status !== 'success') {
+        await this.markOrderFailed(txRef, `Chapa verify status: ${verification.data.status}`);
+        throw new BadRequestException('Payment was not successful');
+      }
+
+      // Verify amount matches what was ordered (prevent price tampering)
+      const verifiedAmount = parseFloat(verification.data.amount);
+      const tolerance = 0.01;
+      if (Math.abs(verifiedAmount - order.totalAmount) > tolerance) {
+        this.logger.error(
+          `Amount mismatch for ${txRef}: expected ${order.totalAmount}, got ${verifiedAmount}`,
+        );
+        await this.markOrderFailed(txRef, 'Amount mismatch');
+        throw new BadRequestException('Payment amount does not match order amount');
+      }
+    } else {
+      this.logger.log(`[PaymentsService] Processing free order ${order._id}`);
     }
 
     // MongoDB transaction: update order + create tickets atomically
@@ -135,18 +156,22 @@ export class PaymentsService {
     try {
       await session.withTransaction(async () => {
         // Mark order as paid (inside transaction)
+        const updateData: any = {
+          status: OrderStatus.PAID,
+          ticketsGenerated: false,
+          'payment.status': PaymentStatus.SUCCESS,
+          'payment.paidAt': new Date(),
+        };
+
+        // Only add Chapa-specific fields for paid orders
+        if (!isFreeOrder && verification) {
+          updateData['payment.transactionId'] = verification.data.reference;
+          updateData['payment.chapaResponse'] = JSON.stringify(verification.data);
+        }
+
         const paid = await this.orderModel.findByIdAndUpdate(
           order._id,
-          {
-            $set: {
-              status: OrderStatus.PAID,
-              ticketsGenerated: false,
-              'payment.status': PaymentStatus.SUCCESS,
-              'payment.transactionId': verification.data.reference,
-              'payment.paidAt': new Date(),
-              'payment.chapaResponse': JSON.stringify(verification.data),
-            },
-          },
+          { $set: updateData },
           { new: true, session },
         );
 

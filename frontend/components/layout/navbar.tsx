@@ -85,12 +85,20 @@ export function Navbar() {
                   aria-expanded={userMenuOpen}
                   aria-haspopup="true"
                 >
-                  <span
-                    className="avatar w-8 h-8 text-xs"
-                    aria-label={user.name}
-                  >
-                    {getInitials(user.name)}
-                  </span>
+                  {user.image ? (
+                    <img 
+                      src={user.image} 
+                      alt={user.name} 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span
+                      className="avatar w-8 h-8 text-xs"
+                      aria-label={user.name}
+                    >
+                      {getInitials(user.name)}
+                    </span>
+                  )}
                   <ChevronDown className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
                 </button>
 
