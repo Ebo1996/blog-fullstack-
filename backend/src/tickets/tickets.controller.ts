@@ -24,7 +24,7 @@ class TicketQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100)
+  @Max(1000)
   limit?: number;
 
   @ApiPropertyOptional({ enum: TicketStatus })
@@ -55,6 +55,34 @@ export class TicketsController {
     return { success: true, ...result };
   }
 
+  // Organizer: Get all tickets for their event
+  // IMPORTANT: This must come BEFORE @Get(':id') to avoid route conflicts
+  @Get('event/:eventId/tickets')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+  @ApiOperation({ summary: '[Organizer] Get all tickets for an event' })
+  async findByEvent(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: any,
+    @Query() query: TicketQueryDto,
+  ) {
+    const result = await this.ticketsService.findByEvent(
+      eventId,
+      user.sub,
+      user.role === UserRole.ADMIN,
+      query.page,
+      query.limit,
+    );
+    return { success: true, ...result };
+  }
+
+  @Get('order/:orderId')
+  @ApiOperation({ summary: 'Get all tickets for an order' })
+  async findByOrder(@Param('orderId') orderId: string) {
+    const data = await this.ticketsService.findByOrder(orderId);
+    return { success: true, data };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get ticket by ID' })
   async findOne(
@@ -73,32 +101,5 @@ export class TicketsController {
   ) {
     const qrDataUrl = await this.ticketsService.getQrDataUrl(id, userId);
     return { success: true, data: { qrDataUrl } };
-  }
-
-  @Get('order/:orderId')
-  @ApiOperation({ summary: 'Get all tickets for an order' })
-  async findByOrder(@Param('orderId') orderId: string) {
-    const data = await this.ticketsService.findByOrder(orderId);
-    return { success: true, data };
-  }
-
-  // Organizer: Get all tickets for their event
-  @Get('event/:eventId/tickets')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
-  @ApiOperation({ summary: '[Organizer] Get all tickets for an event' })
-  async findByEvent(
-    @Param('eventId') eventId: string,
-    @CurrentUser() user: any,
-    @Query() query: TicketQueryDto,
-  ) {
-    const result = await this.ticketsService.findByEvent(
-      eventId,
-      user.sub,
-      user.role === UserRole.ADMIN,
-      query.page,
-      query.limit,
-    );
-    return { success: true, ...result };
   }
 }

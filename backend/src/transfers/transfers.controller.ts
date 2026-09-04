@@ -14,8 +14,15 @@ export class TransfersController {
   @Post()
   @ApiOperation({ summary: 'Initiate a ticket transfer' })
   async initiate(@CurrentUser('sub') userId: string, @Body() dto: InitiateTransferDto) {
-    const data = await this.transfersService.initiate(userId, dto);
-    return { success: true, data };
+    try {
+      console.log(`[TransfersController] POST /transfers - User: ${userId}, Ticket: ${dto.ticketId}, Recipient: ${dto.recipientEmail}`);
+      const data = await this.transfersService.initiate(userId, dto);
+      console.log(`[TransfersController] Transfer initiated successfully`);
+      return { success: true, data };
+    } catch (error) {
+      console.error(`[TransfersController] Transfer failed:`, error.message);
+      throw error;
+    }
   }
 
   @Get()

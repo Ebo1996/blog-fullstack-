@@ -84,4 +84,14 @@ export class NotificationsService {
       data: { ticketId },
     });
   }
+
+  async notifyOrganizerNewSale(organizerId: string, eventTitle: string, quantity: number, buyerName: string) {
+    return this.create({
+      userId: organizerId,
+      type: NotificationType.PAYMENT_SUCCESS,
+      title: 'New ticket sale!',
+      body: `${buyerName} purchased ${quantity} ticket${quantity > 1 ? 's' : ''} for "${eventTitle}"`,
+      data: { eventTitle, quantity, buyerName },
+    });
+  }
 }

@@ -20,21 +20,32 @@ export default function OrganizerAttendeesPage() {
     eventsApi.myEvents({ limit: 100 })
       .then((r) => {
         const evs = r.data?.events ?? r.data ?? []
+        console.log('[Attendees] Loaded events:', evs)
         setEvents(evs)
-        if (evs.length > 0) setSelectedEvent(evs[0]._id)
+        if (evs.length > 0) {
+          console.log('[Attendees] Setting selected event to:', evs[0]._id)
+          setSelectedEvent(evs[0]._id)
+        }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('[Attendees] Error loading events:', err)
+      })
   }, [])
 
   useEffect(() => {
     if (!selectedEvent) return
+    console.log('[Attendees] Fetching tickets for event:', selectedEvent)
     setLoading(true)
     ticketsApi.byEvent(selectedEvent, { limit: 1000 })
       .then((r) => {
+        console.log('[Attendees] Tickets response:', r)
         const tickets = r.data?.tickets ?? r.data ?? []
         setAttendees(Array.isArray(tickets) ? tickets : [])
       })
-      .catch(() => setAttendees([]))
+      .catch((err) => {
+        console.error('[Attendees] Error fetching tickets:', err)
+        setAttendees([])
+      })
       .finally(() => setLoading(false))
   }, [selectedEvent])
 

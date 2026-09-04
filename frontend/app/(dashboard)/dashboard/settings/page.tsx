@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { Upload, Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { authApi } from '@/lib/api/auth'
+import { storageApi } from '@/lib/api/storage'
 import { Input, Textarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -28,6 +30,8 @@ type PasswordData = z.infer<typeof passwordSchema>
 export default function SettingsPage() {
   const { user, setUser } = useAuth()
   const [activeSection, setActiveSection] = useState<'profile' | 'password'>('profile')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const profileForm = useForm<ProfileData>({
     resolver: zodResolver(profileSchema),
@@ -53,6 +57,42 @@ export default function SettingsPage() {
       toast.success('Password changed successfully')
     } catch (err: any) {
       toast.error(err?.message ?? 'Failed to change password')
+    }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    // Validate file size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB')
+      return
+    }
+
+    setUploadingAvatar(true)
+    try {
+      const uploadRes = await storageApi.uploadAvatar(file)
+      const imageUrl = uploadRes.data.url
+      
+      // Update user profile with new image
+      const updateRes = await authApi.updateMe({ image: imageUrl })
+      setUser(updateRes.data)
+      toast.success('Profile picture updated')
+    } catch (err: any) {
+      console.error('Avatar upload error:', err)
+      toast.error(err?.response?.data?.message ?? 'Failed to upload image')
+    } finally {
+      setUploadingAvatar(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
@@ -82,12 +122,46 @@ export default function SettingsPage() {
         {activeSection === 'profile' && (
           <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-5 animate-fade-in">
             <div className="panel flex items-center gap-4 mb-4">
-              <span className="avatar w-14 h-14 text-base" style={{ fontSize: 18 }}>
-                {user?.name?.slice(0, 2).toUpperCase()}
-              </span>
-              <div>
+              <div className="relative">
+                {user?.image ? (
+                  <img 
+                    src={user.image} 
+                    alt={user.name} 
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="avatar w-14 h-14 text-base" style={{ fontSize: 18 }}>
+                    {user?.name?.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
                 <p className="font-semibold text-sm">{user?.name}</p>
                 <p className="text-xs text-[var(--muted-foreground)] capitalize">{user?.role}</p>
+              </div>
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploadingAvatar ? 'Uploading...' : 'Upload photo'}
+                </Button>
               </div>
             </div>
             <Input

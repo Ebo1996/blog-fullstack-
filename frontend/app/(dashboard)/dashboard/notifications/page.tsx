@@ -81,7 +81,8 @@ export default function NotificationsPage() {
                   <Bell className={`w-3.5 h-3.5 ${n.isRead ? 'text-[var(--muted-foreground)]' : 'text-[var(--primary)]'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-xs ${n.isRead ? 'text-[var(--muted-foreground)]' : 'font-semibold'}`}>{n.message}</p>
+                  <p className={`text-sm ${n.isRead ? 'text-[var(--foreground)]' : 'font-semibold text-[var(--foreground)]'}`}>{n.title}</p>
+                  <p className={`text-xs mt-1 ${n.isRead ? 'text-[var(--muted-foreground)]' : 'text-[var(--foreground)]'}`}>{n.body}</p>
                   <p className="text-xs text-[var(--muted-foreground)] mt-1">{timeAgo(n.createdAt)}</p>
                 </div>
                 {!n.isRead && (

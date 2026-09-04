@@ -158,14 +158,16 @@ export default function CreateEventPage() {
       if (publish) {
         if (ticketTypes.length === 0) {
           toast.error('At least one ticket type is required. Event saved as draft.')
+          router.push(`/organizer/events/${eventId}/edit`)
         } else {
           await eventsApi.publish(eventId)
           toast.success('Event published! 🎉')
+          router.push('/organizer/events')
         }
       } else {
         toast.success('Event saved as draft')
+        router.push(`/organizer/events/${eventId}/edit`)
       }
-      router.push(`/organizer/events/${eventId}/edit`)
     } catch (err: any) {
       toast.error(err?.message ?? 'Failed to create event')
     } finally {

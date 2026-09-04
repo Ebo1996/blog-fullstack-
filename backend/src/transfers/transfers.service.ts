@@ -30,40 +30,58 @@ export class TransfersService {
   ) {}
 
   async initiate(fromUserId: string, dto: InitiateTransferDto): Promise<TransferDocument> {
+    console.log(`[TransfersService] Initiating transfer from user ${fromUserId} to ${dto.recipientEmail}`);
+    
     const ticket = await this.ticketsService.findById(dto.ticketId);
+    console.log(`[TransfersService] Ticket found: ${ticket._id}, owner: ${ticket.ownerId}`);
 
-    // Ownership check
-    if (ticket.ownerId.toString() !== fromUserId) {
+    // Ownership check - handle populated ownerId
+    const ownerId = typeof ticket.ownerId === 'object' && ticket.ownerId?._id 
+      ? ticket.ownerId._id.toString() 
+      : ticket.ownerId.toString();
+    
+    if (ownerId !== fromUserId) {
+      console.log(`[TransfersService] Ownership check failed: ${ownerId} !== ${fromUserId}`);
       throw new ForbiddenException('You do not own this ticket');
     }
+    console.log(`[TransfersService] Ownership verified`);
+
 
     // Status checks
     if (ticket.status !== TicketStatus.ACTIVE) {
+      console.log(`[TransfersService] Ticket status is ${ticket.status}, cannot transfer`);
       throw new BadRequestException(`Cannot transfer a ${ticket.status} ticket`);
     }
 
     if (ticket.isTransferPending) {
+      console.log(`[TransfersService] Transfer already pending for this ticket`);
       throw new ConflictException('A transfer for this ticket is already pending');
     }
 
     // Can't transfer to yourself
     const sender = await this.usersService.findById(fromUserId);
     if (sender.email.toLowerCase() === dto.recipientEmail.toLowerCase()) {
+      console.log(`[TransfersService] Cannot transfer to yourself`);
       throw new BadRequestException('Cannot transfer a ticket to yourself');
     }
 
     // Recipient must have an account
+    console.log(`[TransfersService] Looking up recipient: ${dto.recipientEmail}`);
     const recipient = await this.usersService.findByEmail(dto.recipientEmail);
     if (!recipient) {
+      console.log(`[TransfersService] Recipient not found: ${dto.recipientEmail}`);
       throw new NotFoundException('Recipient account not found. They must register first.');
     }
+    console.log(`[TransfersService] Recipient found: ${recipient._id} (${recipient.email})`);
 
     // Check no pending transfer already exists
+    console.log(`[TransfersService] Checking for existing pending transfers`);
     const existingPending = await this.transferModel.findOne({
       ticketId: new Types.ObjectId(dto.ticketId),
       status: TransferStatus.PENDING,
     });
     if (existingPending) {
+      console.log(`[TransfersService] Pending transfer already exists: ${existingPending._id}`);
       throw new ConflictException('A pending transfer already exists for this ticket');
     }
 
@@ -72,6 +90,7 @@ export class TransfersService {
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
+    console.log(`[TransfersService] Creating transfer record`);
     const transfer = await this.transferModel.create({
       ticketId: new Types.ObjectId(dto.ticketId),
       fromUserId: new Types.ObjectId(fromUserId),
@@ -81,13 +100,16 @@ export class TransfersService {
       expiresAt,
       status: TransferStatus.PENDING,
     });
+    console.log(`[TransfersService] Transfer created successfully: ${transfer._id}`);
 
     // Notify recipient (best effort)
     this.notificationsService.notifyTransferReceived(
       recipient._id.toString(),
       sender.name,
       dto.ticketId,
-    ).catch(() => {});
+    ).catch((err) => {
+      console.log(`[TransfersService] Failed to send notification:`, err.message);
+    });
 
     return transfer;
   }

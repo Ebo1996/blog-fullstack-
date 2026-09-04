@@ -170,11 +170,27 @@ export class PaymentsService {
 
     // ── Notifications (outside transaction — best effort) ──────────
     const eventTitle = (order as any).eventId?.title ?? 'your event';
+    const organizerId = (order as any).eventId?.organizerId;
+    const buyerName = (order as any).userId?.name || 'A customer';
+    const totalTickets = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Notify buyer
     this.notificationsService.notifyPaymentSuccess(
       order.userId.toString(),
       eventTitle,
       order._id.toString(),
     ).catch((e) => this.logger.error(`Notification failed: ${e.message}`));
+
+    // Notify organizer
+    if (organizerId) {
+      const orgIdStr = typeof organizerId === 'object' ? organizerId._id?.toString() || organizerId.toString() : organizerId.toString();
+      this.notificationsService.notifyOrganizerNewSale(
+        orgIdStr,
+        eventTitle,
+        totalTickets,
+        buyerName,
+      ).catch((e) => this.logger.error(`Organizer notification failed: ${e.message}`));
+    }
 
     // ── Audit log (outside transaction — best effort) ──────────────
     this.auditLogsService.log({

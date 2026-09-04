@@ -128,12 +128,16 @@ export class TicketsService {
     // Verify the organizer owns this event (unless admin)
     if (!isAdmin) {
       const Event = this.ticketModel.db.model('Event');
-      const event = await Event.findById(eventId);
+      const event: any = await Event.findById(eventId).lean();
       if (!event) throw new NotFoundException('Event not found');
       
-      const eventOrganizerId = event.organizerId?._id 
-        ? event.organizerId._id.toString() 
-        : event.organizerId?.toString();
+      // Handle both populated and non-populated organizerId
+      let eventOrganizerId: string;
+      if (typeof event.organizerId === 'object' && event.organizerId !== null) {
+        eventOrganizerId = event.organizerId._id?.toString() || event.organizerId.toString();
+      } else {
+        eventOrganizerId = event.organizerId?.toString();
+      }
       
       if (eventOrganizerId !== organizerId) {
         throw new ForbiddenException('Access denied');
@@ -149,7 +153,8 @@ export class TicketsService {
         .skip((page - 1) * limit)
         .limit(limit)
         .populate('ownerId', 'name email')
-        .populate('ticketTypeId', 'name price'),
+        .populate('ticketTypeId', 'name price')
+        .lean(),
       this.ticketModel.countDocuments(filter),
     ]);
 
