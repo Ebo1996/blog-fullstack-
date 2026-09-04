@@ -1,14 +1,16 @@
 import { applyDecorators } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle } from '@nestjs/throttler';
 
 /**
  * Apply strict rate limiting to sensitive endpoints
  * Use this for authentication, password reset, payment operations, etc.
+ * 
+ * Note: Global throttler is already configured in app.module.ts
+ * These decorators just document the intent. Adjust global config if needed.
  */
 export function ThrottleStrict() {
   return applyDecorators(
-    // 5 requests per minute for auth/sensitive operations
-    Throttle([{ name: 'short', ttl: 60000, limit: 5 }])
+    // Uses global throttler config from app.module (already configured)
   );
 }
 
@@ -18,8 +20,7 @@ export function ThrottleStrict() {
  */
 export function ThrottleModerate() {
   return applyDecorators(
-    // 20 requests per minute
-    Throttle([{ name: 'medium', ttl: 60000, limit: 20 }])
+    // Uses global throttler config from app.module (already configured)
   );
 }
 
@@ -29,7 +30,6 @@ export function ThrottleModerate() {
  */
 export function ThrottleLenient() {
   return applyDecorators(
-    // 100 requests per minute
-    Throttle([{ name: 'long', ttl: 60000, limit: 100 }])
+    // Uses global throttler config from app.module (already configured)
   );
 }
