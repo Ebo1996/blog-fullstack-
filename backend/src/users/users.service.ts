@@ -50,6 +50,8 @@ export class UsersService {
     image?: string;
     emailVerified?: boolean;
     emailVerificationToken?: string;
+    googleId?: string;
+    isEmailVerified?: boolean;
   }): Promise<UserDocument> {
     const existing = await this.findByEmail(data.email);
     if (existing) {
