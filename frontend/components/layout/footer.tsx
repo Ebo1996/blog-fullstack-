@@ -44,9 +44,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row justify-between gap-3">
+        <div className="border-t border-[var(--border)] pt-6 text-center">
           <p className="text-xs text-[var(--muted-foreground)]">© {year} Eventify Ethiopia. All rights reserved.</p>
-          <p className="text-xs text-[var(--muted-foreground)]">Built with ❤️ in Addis Ababa</p>
         </div>
       </div>
     </footer>
