@@ -1,6 +1,9 @@
 {
   "name": "eventify-api",
   "version": "1.0.0",
+  "description": "Event management and ticketing platform API for Ethiopia",
+  "author": "Ebisa Berhanu <Ebo1996>",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "nest start --watch",
