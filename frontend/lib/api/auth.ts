@@ -57,4 +57,7 @@ export const authApi = {
 
   updateMe: (data: Partial<User>) =>
     apiClient.patch<User>('/users/me', data),
+
+  googleAuth: (credential: string, role: 'attendee' | 'organizer' = 'attendee') =>
+    apiClient.post<AuthResult>('/auth/google', { credential, role }),
 }

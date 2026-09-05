@@ -109,4 +109,16 @@ export class AuthController {
     const user = await this.authService.getMe(userId);
     return { success: true, data: user };
   }
+
+  @Public()
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Google OAuth login/register' })
+  async googleAuth(@Body() body: { credential: string; role?: string }) {
+    // Verify Google token and extract user info
+    const googleUser = await this.authService.verifyGoogleToken(body.credential);
+    const role = body.role === 'organizer' ? 'organizer' : 'attendee';
+    const result = await this.authService.googleLogin(googleUser, role as any);
+    return { success: true, data: result };
+  }
 }

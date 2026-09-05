@@ -90,6 +90,77 @@ export class AuthService {
     await this.usersService.updateRefreshToken(userId, null);
   }
 
+  // ─── Google OAuth ──────────────────────────────────────────────
+  async verifyGoogleToken(credential: string): Promise<any> {
+    try {
+      // Use Google's library to verify the token
+      const { OAuth2Client } = require('google-auth-library');
+      const client = new OAuth2Client(this.configService.get<string>('GOOGLE_CLIENT_ID'));
+      
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
+      
+      const payload = ticket.getPayload();
+      
+      return {
+        googleId: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        image: payload.picture,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+  }
+
+  async googleLogin(googleUser: any, role?: UserRole) {
+    // Check if user exists
+    let user = await this.usersService.findByEmail(googleUser.email);
+
+    if (!user) {
+      // Create new user from Google profile
+      const userRole = role && [UserRole.ATTENDEE, UserRole.ORGANIZER].includes(role)
+        ? role
+        : UserRole.ATTENDEE;
+
+      user = await this.usersService.create({
+        name: googleUser.name,
+        email: googleUser.email,
+        image: googleUser.image,
+        googleId: googleUser.googleId,
+        role: userRole,
+        isEmailVerified: true, // Google emails are pre-verified
+        passwordHash: null, // No password for OAuth users
+      });
+    } else if (!user.googleId) {
+      // Link existing user with Google
+      await this.usersService.update(user._id.toString(), {
+        googleId: googleUser.googleId,
+        isEmailVerified: true,
+      });
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is suspended');
+    }
+
+    const tokens = await this.generateTokens(user);
+    await this.usersService.updateRefreshToken(user._id.toString(), tokens.refreshToken);
+    await this.usersService.updateLastLogin(user._id.toString());
+
+    this.auditLogsService.log({
+      userId: user._id.toString(),
+      action: 'auth.google_login',
+      entityType: 'User',
+      entityId: user._id.toString(),
+      metadata: { role: user.role },
+    }).catch(() => {});
+
+    return { user, ...tokens };
+  }
+
   // ─── Get current user ──────────────────────────────────────────
   async getMe(userId: string) {
     const user = await this.usersService.findById(userId);

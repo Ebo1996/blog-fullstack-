@@ -26,6 +26,9 @@ export class User {
   @Prop({ trim: true })
   image: string;
 
+  @Prop({ unique: true, sparse: true })
+  googleId: string;
+
   @Prop({
     type: String,
     enum: Object.values(UserRole),
@@ -35,6 +38,9 @@ export class User {
 
   @Prop({ default: false })
   emailVerified: boolean;
+
+  @Prop({ default: false })
+  isEmailVerified: boolean;
 
   @Prop({ select: false })
   emailVerificationToken: string;
