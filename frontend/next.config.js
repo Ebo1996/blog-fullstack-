@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Updated: Force cache refresh for Cloudinary images
 const nextConfig = {
   // Vercel deployment optimization
   output: 'standalone',
