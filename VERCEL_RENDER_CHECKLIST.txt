@@ -1,0 +1,178 @@
+╔════════════════════════════════════════════════════════════╗
+║     EVENTIFY ETHIOPIA - VERCEL + RENDER DEPLOYMENT        ║
+║                    CHECKLIST & URLS                        ║
+╚════════════════════════════════════════════════════════════╝
+
+PREPARATION (5 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Code pushed to GitHub
+  Command: git push origin main
+  
+☐ GitHub repository URL: ________________________________
+
+☐ Accounts created:
+  ☐ Vercel: https://vercel.com
+  ☐ Render: https://render.com
+
+
+STEP 1: DEPLOY BACKEND TO RENDER (15 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 1. Create Web Service on Render
+☐ 2. Connect GitHub repository
+☐ 3. Configure:
+     Name: eventify-backend
+     Root Directory: backend
+     Build Command: npm install && npm run build
+     Start Command: node dist/main.js
+     Instance Type: Free (or Starter $7/mo)
+
+☐ 4. Add environment variables (copy from backend/.env.production)
+     Total: 24 variables
+
+☐ 5. Create Web Service → Wait for deployment
+
+☐ 6. Copy Render backend URL:
+     https://________________________________.onrender.com
+
+☐ 7. Test health endpoint:
+     https://________________________________.onrender.com/api/health
+     Should return: {"status":"ok",...}
+
+
+STEP 2: DEPLOY FRONTEND TO VERCEL (10 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 1. Import project on Vercel
+☐ 2. Configure:
+     Framework: Next.js
+     Root Directory: frontend
+     
+☐ 3. Add environment variables:
+     NEXT_PUBLIC_API_URL=https://[YOUR-RENDER-URL].onrender.com/api
+     NEXT_PUBLIC_APP_URL=https://[YOUR-VERCEL-URL].vercel.app
+
+☐ 4. Deploy → Wait for completion
+
+☐ 5. Copy Vercel frontend URL:
+     https://________________________________.vercel.app
+
+☐ 6. Test: Visit URL, should see homepage
+
+
+STEP 3: CONNECT FRONTEND & BACKEND (5 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 1. Update Render environment variables:
+     Go to: Render Dashboard → eventify-backend → Environment
+     
+     Update these 3 variables:
+     ☐ FRONTEND_URL=[YOUR-VERCEL-URL]
+     ☐ CORS_ORIGIN=[YOUR-VERCEL-URL]
+     ☐ CHAPA_RETURN_URL=[YOUR-VERCEL-URL]/payment/success
+
+☐ 2. Save (Render will auto-redeploy, wait 2-3 min)
+
+☐ 3. Update Chapa webhook:
+     URL: https://[YOUR-RENDER-URL].onrender.com/api/payments/chapa/webhook
+
+
+TESTING (5 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Test these in order:
+
+☐ Backend health check works
+☐ Frontend loads correctly
+☐ Register new user
+☐ Login with new user
+☐ Browse events
+☐ Purchase free ticket
+☐ Check email received
+☐ View ticket (QR code shows)
+☐ Test on mobile device
+
+
+YOUR DEPLOYMENT URLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frontend (Vercel):
+https://________________________________.vercel.app
+
+Backend (Render):
+https://________________________________.onrender.com
+
+API Health Check:
+https://________________________________.onrender.com/api/health
+
+API Docs (dev only):
+https://________________________________.onrender.com/api/docs
+
+
+OPTIONAL: CUSTOM DOMAIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your domain: ________________________________
+
+Frontend (Vercel):
+☐ Add domain in Vercel → Settings → Domains
+☐ Add DNS records from Vercel
+☐ Wait for SSL certificate (automatic)
+☐ Update environment variables with new domain
+
+Backend (Render):
+☐ Add custom domain: api.[yourdomain]
+☐ Add CNAME record to DNS
+☐ Wait for SSL certificate (automatic)
+
+
+POST-DEPLOYMENT TASKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Verify email domain at Resend.com
+☐ Get Chapa production keys (when ready for real payments)
+☐ Set up monitoring (optional)
+☐ Share app with test users
+
+
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Issue: Backend takes 30-60 seconds to respond
+→ Normal! Render free tier has cold starts
+→ Upgrade to Starter ($7/mo) for always-on
+
+Issue: CORS errors in browser
+→ Check CORS_ORIGIN in Render matches Vercel URL exactly
+
+Issue: MongoDB connection failed
+→ MongoDB Atlas → Network Access → Add 0.0.0.0/0
+
+Issue: Build failed
+→ Check logs in Render/Vercel dashboard
+→ Verify environment variables are correct
+
+
+SUPPORT & DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Quick Start Guide: DEPLOYMENT_QUICK_START.md
+Full Guide: DEPLOY_VERCEL_RENDER.md
+General Info: READY_TO_DEPLOY.md
+
+Render Docs: https://render.com/docs
+Vercel Docs: https://vercel.com/docs
+
+
+DEPLOYMENT COMPLETE! 🎉
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Date deployed: _______________
+Deployed by: _______________
+
+Notes:
+_____________________________________________________________
+_____________________________________________________________
+_____________________________________________________________
+

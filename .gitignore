@@ -3,9 +3,13 @@ node_modules/
 */node_modules/
 
 # Environment
+# Environment files with secrets
 .env
 .env.local
-.env.*.local
+.env.production
+.env.development
+*.env
+!.env.example
 backend/.env
 frontend/.env
 frontend/.env.local
