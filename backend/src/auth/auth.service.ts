@@ -132,7 +132,7 @@ export class AuthService {
         googleId: googleUser.googleId,
         role: userRole,
         isEmailVerified: true, // Google emails are pre-verified
-        passwordHash: null, // No password for OAuth users
+        passwordHash: undefined, // No password for OAuth users
       });
     } else if (!user.googleId) {
       // Link existing user with Google
