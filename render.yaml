@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: eventify-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npx tsc -p tsconfig.build.json
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 18.20.4
+      - key: NODE_ENV
+        value: production
